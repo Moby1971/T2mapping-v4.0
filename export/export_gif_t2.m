@@ -22,9 +22,9 @@ for idx = 1:number_of_images
     image = uint8(round((63/T2MapScale)*resizem(squeeze(t2map(idx,:,:)),[numrows numcols])));
     
     if idx == 1
-        imwrite(image,t2cmap,[gifexportpath,'/t2map-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
+        imwrite(image,t2cmap,[gifexportpath,filesep,'t2map-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
     else
-        imwrite(image,t2cmap,[gifexportpath,'/t2map-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
+        imwrite(image,t2cmap,[gifexportpath,filesep,'t2map-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
     end
 end
         
@@ -42,9 +42,9 @@ for idx = 1:number_of_images
     image = uint8(round((255/m0scale)*resizem(squeeze(m0map(idx,:,:)),[numrows numcols])));
     
     if idx == 1
-        imwrite(image,[gifexportpath,'/m0map-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
+        imwrite(image,[gifexportpath,filesep,'m0map-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
     else
-        imwrite(image,[gifexportpath,'/m0map-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
+        imwrite(image,[gifexportpath,filesep,'m0map-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
     end
 end
          
