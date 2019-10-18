@@ -12,7 +12,7 @@ function dicom_header = generate_dicomheader_t2(parameters,i,dimx,dimy,dcmid)
 
 studyname = str2num(parameters.filename(end-9:end-6));
 
-aspectratio = parameters.SMX/parameters.SMY;  % apect ratio, needs to be checked
+aspectratio = parameters.FOVf/8;  % apect ratio, needs to be checked
 acq_dur = parameters.NO_VIEWS * parameters.tr * parameters.NO_AVERAGES/1000;   % acquisition time in seconds
 
 pixelx = aspectratio*parameters.FOV/dimx;
