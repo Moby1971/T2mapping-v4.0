@@ -17,24 +17,24 @@ x0 = tes(round(ne/2));
 
 parfor j=1:dimx
     % for all x-coordinates
-     
+    
     if mask(j) == 1
-            % only fit when mask value indicates valid data point
-            
-            % pixel value as function of TE
-            ydata = squeeze(input_images(:,j));
-            
-            % starting value y0
-            y0 = ydata(1);
-            
-            % do the fit
-            x = lsqcurvefit(F,[y0,x0],tes,ydata,[1 1],[Inf Inf],opt);
-            
-            % make the maps
-            m0map(j)=x(1);
-            t2map(j)=x(2);
-            
-        end
+        % only fit when mask value indicates valid data point
+        
+        % pixel value as function of TE
+        ydata = squeeze(input_images(:,j));
+        
+        % starting value y0
+        y0 = ydata(1);
+        
+        % do the fit
+        x = lsqcurvefit(F,[y0,x0],tes,ydata,[1 1],[Inf Inf],opt);
+        
+        % make the maps
+        m0map(j)=x(1);
+        t2map(j)=x(2);
+        
+    end
     
     
 end
