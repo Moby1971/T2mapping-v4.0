@@ -1,4 +1,4 @@
-function export_dicom_t2(directory,m0map,t2map,parameters,tag)
+function export_dicom_t2(directory,m0map,t2map,parameters,tag,orientation)
 
 
 % create folder if not exist, and clear
@@ -10,6 +10,22 @@ delete([folder_name,filesep,'*']);
 folder_name = [directory,[filesep,'T2map-DICOM-',tag]];
 if (~exist(folder_name, 'dir')); mkdir(folder_name); end
 delete([folder_name,filesep,'*']);
+
+
+t2map = flip(permute(t2map,[1,3,2]),3);
+m0map = flip(permute(m0map,[1,3,2]),3);
+
+% Rotate the images if phase orienation == 1
+number_of_images = size(t2map,1);
+if orientation
+    for i = 1:number_of_images
+        t2mapr(i,:,:) = rot90(squeeze(t2map(i,:,:)),-1);
+        m0mapr(i,:,:) = rot90(squeeze(m0map(i,:,:)),-1);
+    end
+    t2map = t2mapr;
+    m0map = m0mapr;
+end
+
 
 [nr_images,dimx,dimy] = size(t2map);
 
