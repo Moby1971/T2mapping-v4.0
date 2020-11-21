@@ -1,4 +1,4 @@
-function [m0map_out,t2map_out,r2map_out] = dotheT2fit_xdim_opt(input_images,mask,tes,rsquare)
+function [m0map_out,t2map_out,r2map_out] = dotheT2fit_xdim_opt(input_images,mask,tes,rsquare,te_selection)
 
 % performs the T2 map fitting for 1 slice
 
@@ -6,6 +6,11 @@ function [m0map_out,t2map_out,r2map_out] = dotheT2fit_xdim_opt(input_images,mask
 m0map = zeros(dimx,1);
 t2map = zeros(dimx,1);
 r2map = zeros(dimx,1);
+
+% drop the TEs that are deselected in the app
+delements = find(te_selection==0);
+tes(delements) = [];
+input_images(delements,:) = [];
 
 x = [ones(length(tes),1),tes];
 

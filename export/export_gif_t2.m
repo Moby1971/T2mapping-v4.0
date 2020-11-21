@@ -1,4 +1,4 @@
-function export_gif_t2(gifexportpath,t2map,m0map,r2map,tag,T2MapScale,t2cmap,m0cmap,r2cmap,aspect,orientation)
+function export_gif_t2(gifexportpath,t2map,m0map,r2map,tag,T2MapScale,t2cmap,m0cmap,r2cmap,aspect,orientation,rsquare)
 
 % Exports t2maps and m0maps to animated gif
 
@@ -61,13 +61,17 @@ for idx = 1:number_of_images
 end
          
 
-% Export the R2 maps to GIF
+% Rescale r2 map from rsquare..1 range to 0..1 
+r2map = r2map - rsquare;
+r2map(r2map<0) = 0;
+r2map = r2map*(1/(1-rsquare));
 
+% Export the R2 maps to GIF
 for idx = 1:number_of_images
     
     % scale R-square map from 0 - 100
     r2scale = 100;
-    
+
     image = uint8(round((255/r2scale)*resizem(squeeze(100*r2map(idx,:,:)),[numrows numcols])));
     
     if idx == 1
