@@ -49,7 +49,8 @@ end
 for i=1:number_of_images
     dcm_header(i).ProtocolName = 'T2-map';
     dcm_header(i).SequenceName = 'T2-map';
-    dcm_header(i).EchoTime = 1;
+    dcm_header(i).EchoTime = 1.1;
+    dcm_header(i).ImageType = 'DERIVED\RELAXATION\T2';
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
     fname = [output_directory,filesep,'T2map-DICOM-',tag,filesep,'T2map_',fn,'.dcm'];
@@ -63,7 +64,8 @@ end
 for i=1:number_of_images
     dcm_header(i).ProtocolName = 'M0-map';
     dcm_header(i).SequenceName = 'M0-map';
-    dcm_header(i).EchoTime = 2;
+    dcm_header(i).EchoTime = 1.2;
+    dcm_header(i).ImageType = 'DERIVED\RELAXATION\M0';
     
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
@@ -78,7 +80,8 @@ end
 for i=1:number_of_images
     dcm_header(i).ProtocolName = 'R2-map';
     dcm_header(i).SequenceName = 'R2-map';
-    dcm_header(i).EchoTime = 3;
+    dcm_header(i).EchoTime = 1.3;
+    dcm_header(i).ImageType = 'DERIVED\RELAXATION\R2';
     
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
