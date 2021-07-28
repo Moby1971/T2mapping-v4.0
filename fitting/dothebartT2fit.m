@@ -9,7 +9,7 @@ function [m0map_out, t2map_out, r2map_out] = dothebartT2fit(app, input_images, m
 m0map = zeros(dimx,dimy);
 t2map = zeros(dimx,dimy);
 r2map = zeros(dimx,dimy);
-tes = tes * 0.001;
+tes = tes/1000;
 
 disp(size(input_images))
 
@@ -63,7 +63,10 @@ disp(size(t2fit));
 % Extract T2 map
 t2map_out = squeeze(abs(t2fit(1,:,:,1,1,1,1)));
 
-imshow(t2fit,[]);
+%maps = squeeze(abs(t2fit(1,:,:,1,1,1,:)));
+%imshow(maps,[]);
+
+max(t2map_out(:))
 
 
 % Convert from R2 to T2
