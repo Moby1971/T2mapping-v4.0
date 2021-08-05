@@ -15,10 +15,10 @@ F = @(x,xdata)x(1)*exp(-xdata/x(2));
 % for fast initial estimation of T2
 x0 = tes(round(ne/2));
 
-for j=1:dimx
+parfor j=1:dimx
     % for all x-coordinates
     
-    parfor k=1:dimy
+    for k=1:dimy
         % for all y-coordinates
         
         if mask(j,k) == 1
