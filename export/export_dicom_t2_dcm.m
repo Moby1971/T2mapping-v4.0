@@ -1,15 +1,11 @@
-function export_dicom_t2_dcm(output_directory,dcm_files_path,m0map,t2map,r2map,tag,orientation)
-
-
-folder_name = [output_directory,[filesep,'T2map-DICOM-',tag]];
-if (~exist(folder_name, 'dir')); mkdir(folder_name); end
-delete([folder_name,filesep,'*']);
+function export_dicom_t2_dcm(directory,dcm_files_path,m0map,t2map,r2map,~,orientation)
 
 
 % Flip and rotate in correct orientation
 t2map = flip(permute(t2map,[1,3,2]),3);
 m0map = flip(permute(m0map,[1,3,2]),3);
 r2map = flip(permute(r2map,[1,3,2]),3);
+
 
 % Rotate the images if phase orienation == 1
 number_of_images = size(t2map,1);
@@ -43,6 +39,18 @@ for i = 1:number_of_images
     
 end
 
+clc;
+disp(dcm_header(1).SeriesNumber)
+
+% create folder if not exist, and delete folder content
+dir1 = dcm_header(1).PatientID;
+dir2 = 'DICOM';
+dir3 = strcat(num2str(dcm_header(1).SeriesNumber),'T2');
+dir4 = '1';
+output_directory = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir4);
+if (~exist(output_directory, 'dir')); mkdir(fullfile(directory, dir1,dir2,dir3,dir4)); end
+delete([output_directory,filesep,'*']);
+
 
 
 % Export the T2 map Dicoms
@@ -53,7 +61,7 @@ for i=1:number_of_images
     dcm_header(i).ImageType = 'DERIVED\RELAXATION\T2';
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
-    fname = [output_directory,filesep,'T2map-DICOM-',tag,filesep,'T2map_',fn,'.dcm'];
+    fname = [output_directory,filesep,'T2',fn,'.dcm'];
     image = rot90(squeeze(cast(round(t2map(i,:,:)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
@@ -69,7 +77,7 @@ for i=1:number_of_images
     
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
-    fname = [output_directory,filesep,'T2map-DICOM-',tag,filesep,'M0map_',fn,'.dcm'];
+    fname = [output_directory,filesep,'M0',fn,'.dcm'];
     image = rot90(squeeze(cast(round(m0map(i,:,:)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
@@ -85,7 +93,7 @@ for i=1:number_of_images
     
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
-    fname = [output_directory,filesep,'T2map-DICOM-',tag,filesep,'R2map_',fn,'.dcm'];
+    fname = [output_directory,filesep,'R2',fn,'.dcm'];
     image = rot90(squeeze(cast(round(100*r2map(i,:,:)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
