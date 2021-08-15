@@ -1,24 +1,16 @@
-function export_dicom_t2_dcm(directory,dcm_files_path,m0map,t2map,r2map,~,orientation)
+function export_dicom_t2_dcm(directory,dcm_files_path,m0map,t2map,r2map,parameters)
 
 
-% Flip and rotate in correct orientation
-t2map = flip(permute(t2map,[1,3,2]),3);
-m0map = flip(permute(m0map,[1,3,2]),3);
-r2map = flip(permute(r2map,[1,3,2]),3);
-
-
-% Rotate the images if phase orienation == 1
-number_of_images = size(t2map,1);
-if orientation
-    for i = 1:number_of_images
-        t2mapr(i,:,:) = rot90(squeeze(t2map(i,:,:)),-1);
-        m0mapr(i,:,:) = rot90(squeeze(m0map(i,:,:)),-1);
-        r2mapr(i,:,:) = rot90(squeeze(r2map(i,:,:)),-1);
+% Phase orientation correction
+if isfield(parameters, 'PHASE_ORIENTATION')
+    if parameters.PHASE_ORIENTATION == 1
+        t2map = permute(rot90(permute(t2map,[2 1 3]),1),[2 1 3]);
+        m0map = permute(rot90(permute(m0map,[2 1 3]),1),[2 1 3]);
+        r2map = permute(rot90(permute(r2map,[2 1 3]),1),[2 1 3]);
     end
-    t2map = t2mapr;
-    m0map = m0mapr;
-    r2map = r2mapr;
 end
+
+[~,~,dimz] = size(t2map);
 
 
 % List of dicom file names
@@ -27,7 +19,7 @@ files = sort({flist.name});
 
 
 % Generate new dicom headers
-for i = 1:number_of_images
+for i = 1:dimz
     
     % Read the Dicom header
     dcm_header(i) = dicominfo([dcm_files_path,filesep,files{i}]);
@@ -54,7 +46,7 @@ delete([output_directory,filesep,'*']);
 
 
 % Export the T2 map Dicoms
-for i=1:number_of_images
+for i=1:dimz
     dcm_header(i).ProtocolName = 'T2-map';
     dcm_header(i).SequenceName = 'T2-map';
     dcm_header(i).EchoTime = 1.1;
@@ -62,14 +54,14 @@ for i=1:number_of_images
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
     fname = [output_directory,filesep,'T2',fn,'.dcm'];
-    image = rot90(squeeze(cast(round(t2map(i,:,:)),'uint16')));
+    image = rot90(squeeze(cast(round(t2map(:,:,i)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
 
 
 
 % Export the M0 map Dicoms
-for i=1:number_of_images
+for i=1:dimz
     dcm_header(i).ProtocolName = 'M0-map';
     dcm_header(i).SequenceName = 'M0-map';
     dcm_header(i).EchoTime = 1.2;
@@ -78,14 +70,14 @@ for i=1:number_of_images
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
     fname = [output_directory,filesep,'M0',fn,'.dcm'];
-    image = rot90(squeeze(cast(round(m0map(i,:,:)),'uint16')));
+    image = rot90(squeeze(cast(round(m0map(:,:,i)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
 
 
 
 % Export the  R^2 map Dicoms
-for i=1:number_of_images
+for i=1:dimz
     dcm_header(i).ProtocolName = 'R2-map';
     dcm_header(i).SequenceName = 'R2-map';
     dcm_header(i).EchoTime = 1.3;
@@ -94,7 +86,7 @@ for i=1:number_of_images
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
     fname = [output_directory,filesep,'R2',fn,'.dcm'];
-    image = rot90(squeeze(cast(round(100*r2map(i,:,:)),'uint16')));
+    image = rot90(squeeze(cast(round(100*r2map(:,:,i)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
 
