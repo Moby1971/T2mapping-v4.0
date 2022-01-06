@@ -36,7 +36,7 @@ parfor j=1:dimx
             
             % R2 map
             yCalc2 = x * b;
-            r2map(j,k) = 1 - sum((y - yCalc2).^2)/sum((y - mean(y)).^2)
+            r2map(j,k) = 1 - sum((y - yCalc2).^2)/sum((y - mean(y)).^2);
             
             % check for low R-square
             if r2map(j,k) < rsquare
