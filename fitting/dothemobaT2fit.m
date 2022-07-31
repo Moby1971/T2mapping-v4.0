@@ -1,16 +1,14 @@
-function [image_out, m0map_out, t2map_out, r2map_out] = dothemobaT2fit(app, kspace, mask, norm, tes, te_selection)
+function [m0MapOut, t2MapOut] = dothemobaT2fit(app, slice)
+
+% ------------------------------------------------------
+% Performs a model-based T2 map fitting for 1 slice
+% ------------------------------------------------------
 
 
-% performs the model-based T2(*) map fitting for 1 slice
-
-
-% size of the data
-[nc, ~ , dimx, dimy] = size(kspace);
-m0map = zeros(dimx,dimy);
-t2map = zeros(dimx,dimy);
-r2map = zeros(dimx,dimy);
-tes = tes * 0.001;
-
+% Multicoil data
+for k = 1:app.nrCoils
+    kSpace(k,:,:,:) = squeeze(app.data{k}(:,:,:,slice)); %#ok<AGROW> 
+end
 
 
 % Bart dimensions
@@ -19,7 +17,7 @@ tes = tes * 0.001;
 % 	PHS2_DIM,       3   x  
 % 	COIL_DIM,       4   coils
 % 	MAPS_DIM,       5   sense maps
-% 	TE_DIM,         6
+% 	TE_DIM,         6   TEs
 % 	COEFF_DIM,      7
 % 	COEFF2_DIM,     8
 % 	ITER_DIM,       9
@@ -30,51 +28,39 @@ tes = tes * 0.001;
 % 	SLICE_DIM,      14  slices
 % 	AVG_DIM,        15
 
-%                             0  1  2  3  4  5  6  7  8  9  10 11 12 13
-%                             1  2  3  4  5  6  7  8  9  10 11 12 13 14
-kspace_pics = permute(kspace,[5 ,4 ,3 ,1 ,6 ,2 ,7 ,8, 9, 10,11,12,13,14]);
 
-% echo times
-TE = permute(tes,[2, 3, 4, 5, 6, 1]);
+%                            0  1  2  3  4  5  6  7  8  9  10 11 12 13
+%                            1  2  3  4  5  6  7  8  9  10 11 12 13 14
+kSpacePics = permute(kSpace,[6 ,3 ,4 ,1 ,7 ,2 ,8 ,9 ,10,11,12,13,14,5 ]);
+
+
+% Prepare the echo times matrix
+TE(1,1,1,1:app.nrCoils,1,:) = app.tes*0.001;
+
 
 % Moba reco
-picscommand = 'moba -G -m0 -d4 -n ';
-t2fit = bart(app,picscommand,kspace_pics,TE);
-
-picscommand = 'moba -F -i10 -C100 -d4 -n ';
-image = bart(app,picscommand,kspace_pics,TE);
+picscommand = 'moba -F -l1 -rT:38:0:0.01 --kfilter-2';
+t2FitCoils = bart(app,picscommand,kSpacePics,TE);
 
 
-imshow(squeeze(abs(t2fit(1,:,:))),[]);
+% Sum of squares reconstruction over the coil dimension
+t2Fit = abs(bart(app,'rss 16', t2FitCoils));
 
-% Extract images
-image_out = squeeze(abs(image(1,:,:,1,1,1,:)));
-image_out = permute(image_out,[3 2 1]);
+
+% Extract M0 map
+m0MapOut = flip(squeeze(t2Fit(1,:,:,1,1,1,1)),2);
 
 
 % Extract T2 map
-t2map_out = squeeze(abs(t2fit(1,:,:,1,1,1,2)));
-t2map_out = permute(t2map_out,[2 1]);
-
-% Convert from R2 to T2
-t2map_out = 1000./t2map_out;
-t2map_out(isinf(t2map_out)) = 0;
-t2map_out(isnan(t2map_out)) = 0;
-
-% Mask
-t2map_out = t2map_out.*mask;
-
-% M0
-m0map_out = squeeze(abs(t2fit(1,:,:,1,1,1,1)));
-m0map_out = permute(m0map_out,[2 1]);
-m0map_out = m0map_out.*mask;
-
-% Normalization
-norma = 16384/max(image_out(:));
-m0map_out = round(norma*m0map_out);
-image_out = round(norma*image_out);
+% Somewhere in the function T2fun.c of Bart I noticed a scaling factor of 10
+t2MapOut = 100./flip(squeeze(t2Fit(1,:,:,1,1,1,2)),2);
+t2MapOut(isinf(t2MapOut)) = 0;
+t2MapOut(isnan(t2MapOut)) = 0;
 
 
-r2map_out = r2map;
+% Masking
+t2MapOut = t2MapOut.*squeeze(app.mask(:,:,slice));
+m0MapOut = m0MapOut.*squeeze(app.mask(:,:,slice));
+
 
 end

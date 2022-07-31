@@ -10,7 +10,7 @@ if ispc
         return
     end
 
-    bart_path = getenv('TOOLBOX_PATH');
+    bart_path = getenv('TOOLBOX_PATH'); %#ok<NASGU> 
 
     % clear the LD_LIBRARY_PATH environment variable (to work around
     % a bug in Matlab).
@@ -40,7 +40,7 @@ if ispc
     out_str = sprintf(' %s', out{:});
 
     % For WSL and modify paths
-    cmdWSL = WSLPathCorrection(cmd);
+    cmdWSL = WSLPathCorrection(cmd); %#ok<NASGU> 
     in_strWSL = WSLPathCorrection(in_str);
     out_strWSL =  WSLPathCorrection(out_str);
 
