@@ -102,6 +102,9 @@ if reordering2 == 'cen'
     end
 end
 
+% pre-allocate the data matrix
+m_C_1=zeros(no_expts,no_echoes,no_slices,max(ord(:)),max(ord2(:)),no_samples);
+
 for a=1:no_expts
     for b=1:no_echoes
         for c=1:no_slices

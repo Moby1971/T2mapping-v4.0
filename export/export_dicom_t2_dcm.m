@@ -22,7 +22,7 @@ files = sort({flist.name});
 for i = 1:dimz
     
     % Read the Dicom header
-    dcm_header(i) = dicominfo([dcm_files_path,filesep,files{i}]);
+    dcm_header(i) = dicominfo([dcm_files_path,filesep,files{i}]); %#ok<*AGROW> 
     
     % Changes some tags
     dcm_header(i).ImageType = 'DERIVED\RELAXATION\';
@@ -31,17 +31,31 @@ for i = 1:dimz
     
 end
 
-clc;
-disp(dcm_header(1).SeriesNumber)
-
-% create folder if not exist, and delete folder content
+% create folders if not exist, and delete folders content
 dir1 = dcm_header(1).PatientID;
 dir2 = 'DICOM';
 dir3 = strcat(num2str(dcm_header(1).SeriesNumber),'T2');
-dir4 = '1';
-output_directory = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir4);
-if (~exist(output_directory, 'dir')); mkdir(fullfile(directory, dir1,dir2,dir3,dir4)); end
-delete([output_directory,filesep,'*']);
+dir41 = '1';
+dir42 = '2';
+dir43 = '3';
+
+output_directory1 = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir41);
+if (~exist(output_directory1, 'dir')) 
+    mkdir(fullfile(directory, dir1,dir2,dir3,dir41)); 
+end
+delete([output_directory1,filesep,'*']);
+
+output_directory2 = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir42);
+if (~exist(output_directory2, 'dir')) 
+    mkdir(fullfile(directory, dir1,dir2,dir3,dir42)); 
+end
+delete([output_directory2,filesep,'*']);
+
+output_directory3 = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir43);
+if (~exist(output_directory3, 'dir')) 
+    mkdir(fullfile(directory, dir1,dir2,dir3,dir43)); 
+end
+delete([output_directory3,filesep,'*']);
 
 
 
@@ -53,7 +67,7 @@ for i=1:dimz
     dcm_header(i).ImageType = 'DERIVED\RELAXATION\T2';
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
-    fname = [output_directory,filesep,'T2',fn,'.dcm'];
+    fname = [output_directory1,filesep,'T2',fn,'.dcm'];
     image = rot90(squeeze(cast(round(t2map(:,:,i)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
@@ -69,7 +83,7 @@ for i=1:dimz
     
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
-    fname = [output_directory,filesep,'M0',fn,'.dcm'];
+    fname = [output_directory2,filesep,'M0',fn,'.dcm'];
     image = rot90(squeeze(cast(round(m0map(:,:,i)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
@@ -85,7 +99,7 @@ for i=1:dimz
     
     fn = ['0000',num2str(i)];
     fn = fn(size(fn,2)-4:size(fn,2));
-    fname = [output_directory,filesep,'R2',fn,'.dcm'];
+    fname = [output_directory3,filesep,'R2',fn,'.dcm'];
     image = rot90(squeeze(cast(round(100*r2map(:,:,i)),'uint16')));
     dicomwrite(image, fname, dcm_header(i));
 end
