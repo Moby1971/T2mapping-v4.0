@@ -42,16 +42,12 @@ kSpacePics = permute(kSpace,[6 ,3 ,4 ,1 ,7 ,2 ,8 ,9 ,10,11,12,13,14,5 ]);
 
 
 % Prepare the echo times matrix
-TE(1,1,1,1:app.nrCoils,1,:) = tes*0.001;
+TE(1,1,1,1,1,:) = tes*0.001;
 
 
 % Moba reco
-picscommand = 'moba -F -l1 -rS:0 -rT:38:0:0.001 --kfilter-1';
-t2FitCoils = bart(app,picscommand,kSpacePics,TE);
-
-
-% Sum of squares reconstruction over the coil dimension
-t2Fit = abs(bart(app,'rss 16', t2FitCoils));
+picscommand = 'moba -F -d4 -l1 -i8 -C100 -rS:0 -rT:38:0:0.001 --kfilter-1 -n';
+t2Fit = abs(bart(app,picscommand,kSpacePics,TE));
 
 
 % Extract M0 map
