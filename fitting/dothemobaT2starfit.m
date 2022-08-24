@@ -41,10 +41,21 @@ kSpace(:,delements,:,:) = [];
 kSpacePics = permute(kSpace,[6 ,3 ,4 ,1 ,7 ,2 ,8 ,9 ,10,11,12,13,14,5 ]);
 
 
+% Do a simple bart reconstruction of the individual images first
+sensitivities = ones(size(kSpacePics));
+picsCommand = 'pics -RW:6:0:0.001 ';
+images = bart(app,picsCommand,kSpacePics,sensitivities);
+
+% Do a phase correction
+phaseImage = angle(images);
+images = images.*exp(-1i.*phaseImage);
+kSpacePics = bart(app,'fft -u 6',images);
+
+
 % Prepare the echo times matrix
 % In the test files in Bart the TE's are mulitplied by 0.01, not 0.001
 % There seems to be a scaling factor of 10
-TE(1,1,1,1:app.nrCoils,1,:) = tes*0.01;
+TE(1,1,1,1,1,:) = tes*0.001;
 
 % ---------------------
 % Moba reco
@@ -54,23 +65,16 @@ TE(1,1,1,1:app.nrCoils,1,:) = tes*0.01;
 % -rQ:1 = l2 regularization
 % -rS:0 = non-negative constraint
 %
-picscommand = 'moba -G -m2 -rQ:1 -rS:0 -rW:3:64:1 -i10 -C100 -u0.0001 --kfilter-2 ';
+bartCommand = 'moba -F -d4 -l1 -i8 -C100 -rS:0 -rT:38:0:0.001 --kfilter-1 -n';
+t2Fit = abs(bart(app,bartCommand,kSpacePics,TE));
 
-picscommand = 'moba -G -m1 ';
-t2FitCoils = bart(app,picscommand,kSpacePics,TE);
-
-
-% Sum of squares reconstruction over the coil dimension
-t2Fit = bart(app,'rss 16', t2FitCoils);
-
-disp(size(t2Fit))
 
 % Extract M0 map
 m0MapOut = flip(squeeze(t2Fit(1,:,:,1,1,1,1)),2);
 
 
 % Extract T2 map in ms
-t2MapOut = 1000./flip(squeeze(t2Fit(1,:,:,1,1,1,2)),2);
+t2MapOut = 100./flip(squeeze(t2Fit(1,:,:,1,1,1,2)),2);
 t2MapOut(isinf(t2MapOut)) = 0;
 t2MapOut(isnan(t2MapOut)) = 0;
 
