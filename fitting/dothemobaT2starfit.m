@@ -65,6 +65,10 @@ TE(1,1,1,1,1,:) = tes*0.001;
 % -rQ:1 = l2 regularization
 % -rS:0 = non-negative constraint
 %
+
+% I could not get the actual T2* fit working
+% After phase-correction, I therefore used the TSE fit to extract a monoexponential decay constant
+
 bartCommand = 'moba -F -d4 -l1 -i8 -C100 -rS:0 -rT:38:0:0.001 --kfilter-1 -n';
 t2Fit = abs(bart(app,bartCommand,kSpacePics,TE));
 
