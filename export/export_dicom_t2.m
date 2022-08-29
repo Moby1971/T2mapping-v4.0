@@ -24,8 +24,6 @@ dcmid = dicomuid;   % unique identifier
 dcmid = dcmid(1:50);
 
 
-
-
 for i=1:dimz
     dcm_header = generate_dicomheader_t2(parameters,i,dimx,dimy,dcmid);
     dcm_header.ProtocolName = 'T2-map';

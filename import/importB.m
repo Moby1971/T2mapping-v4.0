@@ -1,52 +1,63 @@
 % ---------------------------------------------------------------------------------
 % Import B-type scanner data
 % ---------------------------------------------------------------------------------
-function [rawData, parameters] = importB(importPath) %#ok<*INUSL>
+function [rawData, rawImages, parameters] = importB(importPath) %#ok<*INUSL>
 
 
 % Parameters
 info1 = jCampRead(strcat(importPath,'acqp'));
 info2 = jCampRead(strcat(importPath,'method'));
 
+
 % Scanner type
-parameters.scanner = 'B-type';
+parameters.scanner = 'b-type';
+parameters.filename = '111';
+
+
+% Check if MGE pulse program
+if contains(info1.PULPROG,"MGE")
+    parameters.PPL = 'flash';
+else
+    parameters.PPL = 'noncompatible';
+end
+
 
 % Slices
 parameters.NO_SLICES = str2num(info1.NSLICES);
-parameters.SLICE_THICKNESS = str2num(info2.pvm.slicethick) * parameters.NO_SLICES;
+parameters.SLICE_THICKNESS = str2num(info2.pvm.slicethick);
+parameters.SLICE_SEPARATION = info2.pvm.spackarrslicegap;
+parameters.SLICE_INTERLEAVE = 1;
+
 
 % Matrix in readout direction
-parameters.NO_SAMPLES = info1.acq.size(1) / 2;
-if isfield(info2.pvm,"matrix")
-    parameters.NO_VIEWS = info2.pvm.encmatrix(1);
-end
+parameters.NO_SAMPLES = info2.pvm.matrix(1);
+
 
 % Matrix in phase encoding direction
-parameters.NO_VIEWS = info1.acq.size(2);
-if isfield(info2.pvm,"matrix")
-    parameters.NO_VIEWS = info2.pvm.encmatrix(2);
-end
+parameters.NO_VIEWS = info2.pvm.matrix(2);
+
 
 % Phase encoding orientation
 parameters.PHASE_ORIENTATION = 1;
 pm1 = -1;
 pm2 = -1;
 
+
 % Determine how to flip the data for different orientations
 if isfield(info2.pvm,'spackarrreadorient')
-    if strcmp(info2.pvm.spackarrreadorient,'L_R')
+    if strcmp(info2.pvm.spackarrreadorient(1:3),'L_R')
         parameters.PHASE_ORIENTATION = 0;
         flr =  0;
         pm1 = +1;
         pm2 = -1;
     end
-    if strcmp(info2.pvm.spackarrreadorient,'A_P')
+    if strcmp(info2.pvm.spackarrreadorient(1:3),'A_P')
         parameters.PHASE_ORIENTATION = 1;
         flr =  0;
         pm1 = -1;
         pm2 = -1;
     end
-    if strcmp(info2.pvm.spackarrreadorient,'H_F')
+    if strcmp(info2.pvm.spackarrreadorient(1:3),'H_F')
         parameters.PHASE_ORIENTATION = 1;
         flr =  0;
         pm1 = -1;
@@ -54,26 +65,31 @@ if isfield(info2.pvm,'spackarrreadorient')
     end
 end
 
+
+
 % Matrix in 2nd phase encoding direction
 parameters.NO_VIEWS_2 = 1;
 parameters.pe2_centric_on = 0;
 
+
 % FOV
 parameters.FOV = info1.acq.fov(1)*10;
 parameters.FOV2 = info1.acq.fov(2)*10;
-parameters.FOVf = round(8*parameters.FOV2/parameters.FOV);
+parameters.FOVf = round(8*(parameters.FOV2/parameters.FOV)*(parameters.NO_SAMPLES/parameters.NO_VIEWS));
+
 
 % Sequence parameters
 parameters.tr = info1.acq.repetition_time;
-parameters.te = info1.acq.echo_time;
+parameters.echotimes = info2.EffectiveTE';
+parameters.te = parameters.echotimes(1);
+parameters.NO_ECHOES = length(parameters.echotimes);
 parameters.alpha = str2num(info1.acq.flip_angle);
-parameters.NO_ECHOES = 1;
 parameters.NO_AVERAGES = str2num(info1.NA);
+
 
 % Other parameters
 parameters.date = datetime;
 parameters.nucleus = '1H';
-parameters.PPL = 'MGE';
 parameters.filename = 'Proton';
 parameters.field_strength = str2num(info1.BF1)/42.58; %#ok<*ST2NM>
 parameters.filename = 111;
@@ -83,27 +99,8 @@ parameters.slice_nav = 0;
 
 
 % Number of receiver coils
-parameters.nr_coils = str2num(info2.pvm.encnreceivers);
+parameters.nr_coils = 1;
 
-% Trajectory 1st phase encoding direction
-if isfield(info2.pvm,'ppggradamparray1')
-    if isfield(info2.pvm,'enczfaccel1') && isfield(info2.pvm,'encpftaccel1')
-        parameters.gp_var_mul = round(pm1 * info2.pvm.ppggradamparray1 * str2num(info2.pvm.enczfaccel1) * str2num(info2.pvm.encpftaccel1) * (parameters.NO_VIEWS / 2 - 0.5));
-    else
-        parameters.gp_var_mul = round(pm1 * info2.pvm.ppggradamparray1 * (parameters.NO_VIEWS / 2 - 0.5));
-    end
-    parameters.pe1_order = 3;
-elseif isfield(info2.pvm,'encvalues1')
-    if isfield(info2.pvm,'enczf') && isfield(info2.pvm,'encpft')
-        parameters.gp_var_mul = round(pm1 * info2.pvm.encvalues1 * info2.pvm.enczf(2) * info2.pvm.encpft(2) * (parameters.NO_VIEWS / 2 - 0.5));
-    else
-        parameters.gp_var_mul = round(pm1 * info2.pvm.encvalues1 * (parameters.NO_VIEWS / 2 - 0.5));
-    end
-    parameters.pe1_order = 3;
-else
-    % Assume linear
-    parameters.pe1_order = 1;
-end
 
 % Data type
 datatype = 'int32';
@@ -116,72 +113,44 @@ if isfield(info1.acq,'word_size')
     end
 end
 
+
 % Read data
 if isfile(strcat(importPath,'fid'))
-    fileID = fopen(strcat(importPath,'fid'));
+    fileID = fopen(strcat(importPath,filesep,'pdata',filesep,'1',filesep,'2dseq'));
 end
 dataRaw = fread(fileID,datatype);
 fclose(fileID);
-kReal = dataRaw(1:2:end);
-kIm = dataRaw(2:2:end);
-kSpace = kReal + 1j*kIm;
 
-% Phase offset
-if isfield(info1.acq,'phase1_offset')
-    parameters.pixelshift1 = round(pm1 * parameters.NO_VIEWS * info1.acq.phase1_offset / parameters.FOV);
-end
 
-% 2D data
-if strcmp(info2.pvm.spatdimenum,"2D") || strcmp(info2.pvm.spatdimenum,"<2D>")
+% Images
+rawImages = reshape(dataRaw,[parameters.NO_SAMPLES,parameters.NO_VIEWS,parameters.NO_SLICES,parameters.NO_ECHOES]);
+rawImages = permute(rawImages,[4 1 2 3]);
+rawImages = flip(rawImages,3);
 
-    % In case k-space trajectory was hacked by macro
-    if isfield(info2.pvm,'ppggradamparray1')
-        parameters.NO_VIEWS = length(info2.pvm.ppggradamparray1);
+
+% normalize to convenient range
+norm = 16384/max(rawImages(:));
+rawImages = round(norm*rawImages);
+
+
+% Make new k-space
+for i = 1:size(rawImages,1)
+    for j = 1:size(rawImages,4)
+        rawData{1}(i,:,:,j) = ifft2reco(squeeze(rawImages(i,:,:,j)));
     end
-
-    % Imaging k-space
-    singleRep = parameters.NO_SLICES*parameters.NO_SAMPLES*parameters.nr_coils*parameters.NO_VIEWS;
-    parameters.EXPERIMENT_ARRAY = floor(length(kSpace)/singleRep);
-    kSpace = kSpace(1:singleRep*parameters.EXPERIMENT_ARRAY,:);
-    kSpace = reshape(kSpace,parameters.NO_SLICES,parameters.NO_SAMPLES,parameters.nr_coils,parameters.NO_VIEWS,parameters.EXPERIMENT_ARRAY);
-
-    parameters.EXPERIMENT_ARRAY = size(kSpace,5);
-    kSpace = permute(kSpace,[3,5,1,4,2]); % nc, nr, ns, np, nf
-
-    % Flip readout if needed
-    if flr
-        kSpace = flip(kSpace,5);
-    end
-
-    % Coil intensity scaling
-    if isfield(info2.pvm,'encchanscaling')
-        for i = 1:parameters.nr_coils
-            kSpace(i,:) = kSpace(i,:) * info2.pvm.encchanscaling(i);
-        end
-    end
-
-    % Navigator
-    navKspace = navKspace(1:parameters.NO_SLICES*parameters.no_samples_nav*parameters.nr_coils*parameters.NO_VIEWS*parameters.EXPERIMENT_ARRAY);
-    navKspace = reshape(navKspace,parameters.NO_SLICES,parameters.no_samples_nav,parameters.nr_coils,parameters.NO_VIEWS,parameters.EXPERIMENT_ARRAY);
-    navKspace = permute(navKspace,[3,5,1,4,2]);
-
-    % Insert 34 point spacer to make the data compatible with MR Solutions data
-    kSpacer = zeros(parameters.nr_coils,parameters.EXPERIMENT_ARRAY,parameters.NO_SLICES,parameters.NO_VIEWS,34);
-
-    % Raw k-space data
-    rawData = cell(parameters.nr_coils);
-    for i = 1:parameters.nr_coils
-        rawData{i} = squeeze(kSpace(i,:,:,:,:));
-    end
-
 end
 
 
-%--------------------------------------------------------
 
-% Read reco files to a structure
+
+
+    %--------------------------------------------------------
+    %
+    % Read reco files to a structure
+    %
+    %--------------------------------------------------------
+
     function struct = jCampRead(filename) %#ok<STOUT>
-
 
         % Open file read-only big-endian
         fid = fopen(filename,'r','b');
@@ -309,6 +278,6 @@ end
 
         end
 
-    end
+    end % jCampRead
 
-end % importB
+end % ImportB

@@ -1,19 +1,22 @@
-function [m0map_out,t2map_out,r2map_out] = dotheT2fit_slice(input_images,mask,tes,rsquare,te_selection)
+function [m0map_out,t2map_out,r2map_out] = dotheT2fit_slice(inputImages,mask,tes,rSquare,teSelection)
 
 % performs the T2 map fitting for 1 slice
 
+
 % image dimensions
-[~,dimx,dimy] = size(input_images);
+[~,dimx,dimy] = size(inputImages);
 m0map = zeros(dimx,dimy);
 t2map = zeros(dimx,dimy);
 r2map = zeros(dimx,dimy);
 
+
 % drop the TEs that are deselected in the app
-delements = find(te_selection==0);
+delements = find(teSelection==0);
 tes(delements) = [];
-input_images(delements,:,:) = [];
+inputImages(delements,:,:) = [];
 
 x = [ones(length(tes),1),tes];
+
 
 parfor j=1:dimx
     % for all x-coordinates
@@ -25,7 +28,7 @@ parfor j=1:dimx
             % only fit when mask value indicates valid data point
             
             % logarithm of pixel value as function of TE
-            y = log(squeeze(input_images(:,j,k)));
+            y = log(squeeze(inputImages(:,j,k)));
             
             % do the linear regression
             b = x\y;
@@ -39,7 +42,7 @@ parfor j=1:dimx
             r2map(j,k) = 1 - sum((y - yCalc2).^2)/sum((y - mean(y)).^2);
             
             % check for low R-square
-            if r2map(j,k) < rsquare
+            if r2map(j,k) < rSquare
                 m0map(j,k) = 0;
                 t2map(j,k) = 0;
                 r2map(j,k) = 0;

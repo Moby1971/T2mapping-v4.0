@@ -8,7 +8,7 @@ function export_gif_t2(gifexportpath,t2map,m0map,r2map,tag,T2MapScale,t2cmap,m0c
 
 % Increase the size of the matrix to make the exported images bigger
 numrows = 2*dimx;
-numcols = 2*round(dimy/aspect);
+numcols = 2*round(dimy*aspect);
 
 % Animated gif delay time
 delay_time = 2/dimz;  % 2 seconds in total

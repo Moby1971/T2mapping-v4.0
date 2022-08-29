@@ -10,12 +10,16 @@ function dicom_header = generate_dicomheader_t2(parameters,i,dimx,dimy,dcmid)
 %
 %
 
-studyname = str2num(parameters.filename(end-9:end-6));
+try
+    studyname = str2num(parameters.filename(end-9:end-6)); %#ok<ST2NM> 
+catch
+    studyname = 111;
+end
 
 aspectratio = parameters.FOVf/8;  % apect ratio, needs to be checked
 acq_dur = parameters.NO_VIEWS * parameters.tr * parameters.NO_AVERAGES/1000;   % acquisition time in seconds
 
-pixelx = aspectratio*parameters.FOV/dimx;
+pixelx = parameters.FOV/dimx;
 pixely = parameters.FOV/dimy;
 
 fn = ['0000',num2str(i)];
