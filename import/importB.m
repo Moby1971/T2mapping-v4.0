@@ -101,6 +101,9 @@ parameters.slice_nav = 0;
 % Number of receiver coils
 parameters.nr_coils = 1;
 
+% Assuming only 1 dynamic
+parameters.EXPERIMENT_ARRAY = 1;
+
 
 % Data type
 datatype = 'int32';

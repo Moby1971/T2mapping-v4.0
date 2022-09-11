@@ -1,4 +1,4 @@
-function [m0MapOut, t2MapOut] = dothemobaT2starfit(app, slice)
+function [m0MapOut, t2MapOut] = dothemobaT2starfit(app, slice, dynamic)
 
 % ---------------------------------------------------------------------------------
 % Performs a model-based T2* map fitting of multi-gradient-echo data for 1 slice
@@ -7,8 +7,10 @@ function [m0MapOut, t2MapOut] = dothemobaT2starfit(app, slice)
 
 % Multicoil data
 for k = 1:app.nrCoils
-    kSpace(k,:,:,:) = squeeze(app.data{k}(:,:,:,slice)); %#ok<AGROW> 
+    kSpace(k,:,:,:) = squeeze(app.data{k}(:,:,:,slice,dynamic)); %#ok<AGROW> 
 end
+
+disp(size(kSpace))
 
 
 % Remove the TEs that are deselected in the app
@@ -41,10 +43,14 @@ kSpace(:,delements,:,:) = [];
 kSpacePics = permute(kSpace,[6 ,3 ,4 ,1 ,7 ,2 ,8 ,9 ,10,11,12,13,14,5 ]);
 
 
+disp(size(kSpacePics))
+
 % Do a simple bart reconstruction of the individual images first
 sensitivities = ones(size(kSpacePics));
 picsCommand = 'pics -RW:6:0:0.001 ';
 images = bart(app,picsCommand,kSpacePics,sensitivities);
+
+disp('*')
 
 % Do a phase correction
 phaseImage = angle(images);
@@ -91,8 +97,8 @@ m0MapOut(t2MapOut > 500) = 0;
 
 
 % Masking
-t2MapOut = t2MapOut.*squeeze(app.mask(:,:,slice));
-m0MapOut = m0MapOut.*squeeze(app.mask(:,:,slice));
+t2MapOut = t2MapOut.*squeeze(app.mask(:,:,slice,dynamic));
+m0MapOut = m0MapOut.*squeeze(app.mask(:,:,slice,dynamic));
 
 
 end

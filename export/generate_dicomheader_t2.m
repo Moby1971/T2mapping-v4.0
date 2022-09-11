@@ -1,4 +1,4 @@
-function dicom_header = generate_dicomheader_t2(parameters,i,dimx,dimy,dcmid)
+function dicom_header = generate_dicomheader_t2(parameters,slice,dynamic,dimx,dimy,dimz,dimd,dcmid)
 
 %
 % GENERATES DICOM HEADER FOR EXPORT
@@ -17,14 +17,15 @@ catch
 end
 
 aspectratio = parameters.FOVf/8;  % apect ratio, needs to be checked
-acq_dur = parameters.NO_VIEWS * parameters.tr * parameters.NO_AVERAGES/1000;   % acquisition time in seconds
 
 pixelx = parameters.FOV/dimx;
 pixely = parameters.FOV/dimy;
 
-fn = ['0000',num2str(i)];
+fn = ['0000',num2str(slice)];
 fn = fn(size(fn,2)-4:size(fn,2));
-fname = ['cine_',fn,'.dcm'];
+dn = ['0000',num2str(dynamic)];
+dn = dn(size(dn,2)-4:size(dn,2));
+fname = ['T2-slice',fn,'-dynamic',dn,'.dcm'];
 
 dt = datetime(parameters.date,'InputFormat','dd-MMM-yyyy HH:mm:ss');
 year = num2str(dt.Year);
@@ -160,21 +161,20 @@ dcmhead.PatientPosition = 'HFS';
 dcmhead.Sensitivity = [];
 dcmhead.FieldOfViewOrigin = [];
 dcmhead.FieldOfViewRotation = [];
-dcmhead.AcquisitionDuration = acq_dur;
+dcmhead.AcquisitionDuration = parameters.TotalAcquisitionTime;
 dcmhead.StudyInstanceUID = dcmid(1:18);
 dcmhead.SeriesInstanceUID = [dcmid(1:18),'.',num2str(studyname)];
 dcmhead.StudyID = '01';
 dcmhead.SeriesNumber = studyname;
 dcmhead.AcquisitionNumber = 1;
-dcmhead.InstanceNumber = i;          
-dcmhead.ImagePositionPatient = [-(aspectratio*parameters.FOV/2), -parameters.FOV/2 (i-round(parameters.NO_SLICES/2))*(parameters.SLICE_SEPARATION/parameters.SLICE_INTERLEAVE)]';
+dcmhead.InstanceNumber = (dynamic-1)*dimz + slice;       
+dcmhead.ImagePositionPatient = [-(aspectratio*parameters.FOV/2), -parameters.FOV/2 (slice-round(parameters.NO_SLICES/2))*(parameters.SLICE_SEPARATION/parameters.SLICE_INTERLEAVE)]';
 dcmhead.ImageOrientationPatient = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]';
 dcmhead.FrameOfReferenceUID = '';
-dcmhead.TemporalPositionIdentifier = 1;
-dcmhead.NumberOfTemporalPositions = 1;
-dcmhead.TemporalResolution = parameters.tr;
-dcmhead.ImagesInAcquisition = parameters.NO_SLICES;
-dcmhead.SliceLocation = (i-round(parameters.NO_SLICES/2))*(parameters.SLICE_SEPARATION/parameters.SLICE_INTERLEAVE);
+dcmhead.TemporalPositionIdentifier = dynamic;
+dcmhead.NumberOfTemporalPositions = dimd;
+dcmhead.TemporalResolution = parameters.TotalAcquisitionTime/dimd;
+dcmhead.SliceLocation = (slice-round(parameters.NO_SLICES/2))*(parameters.SLICE_SEPARATION/parameters.SLICE_INTERLEAVE);
 dcmhead.ImageComments = '';
 dcmhead.TemporalPositionIndex = uint32([]);
 dcmhead.SamplesPerPixel = 1;

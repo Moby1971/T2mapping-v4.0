@@ -1,4 +1,4 @@
-function [m0MapOut, t2MapOut] = dothemobaT2fit(app, slice)
+function [m0MapOut, t2MapOut] = dothemobaT2fit(app, slice, dynamic)
 
 % -----------------------------------------------------------------------
 % Performs a model-based T2 map fitting of multi-echo data for 1 slice
@@ -7,7 +7,7 @@ function [m0MapOut, t2MapOut] = dothemobaT2fit(app, slice)
 
 % Multicoil data
 for k = 1:app.nrCoils
-    kSpace(k,:,:,:) = squeeze(app.data{k}(:,:,:,slice)); %#ok<AGROW> 
+    kSpace(k,:,:,:) = squeeze(app.data{k}(:,:,:,slice,dynamic)); %#ok<AGROW> 
 end
 
 
