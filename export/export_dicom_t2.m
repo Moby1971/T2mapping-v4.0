@@ -47,6 +47,7 @@ for dynamic = 1:dimd
 end
 
 
+m0map = round(32767*m0map/max(m0map(:)));
 
 for dynamic = 1:dimd
 

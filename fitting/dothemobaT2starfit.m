@@ -10,8 +10,6 @@ for k = 1:app.nrCoils
     kSpace(k,:,:,:) = squeeze(app.data{k}(:,:,:,slice,dynamic)); %#ok<AGROW> 
 end
 
-disp(size(kSpace))
-
 
 % Remove the TEs that are deselected in the app
 delements = app.teSelection==0;
@@ -43,14 +41,11 @@ kSpace(:,delements,:,:) = [];
 kSpacePics = permute(kSpace,[6 ,3 ,4 ,1 ,7 ,2 ,8 ,9 ,10,11,12,13,14,5 ]);
 
 
-disp(size(kSpacePics))
-
 % Do a simple bart reconstruction of the individual images first
 sensitivities = ones(size(kSpacePics));
 picsCommand = 'pics -RW:6:0:0.001 ';
 images = bart(app,picsCommand,kSpacePics,sensitivities);
 
-disp('*')
 
 % Do a phase correction
 phaseImage = angle(images);

@@ -30,18 +30,17 @@ parameters.SLICE_INTERLEAVE = 1;
 
 
 % Matrix in readout direction
-parameters.NO_SAMPLES = info2.pvm.matrix(1);
+parameters.NO_SAMPLES = double(info2.pvm.matrix(1));
 
 
 % Matrix in phase encoding direction
-parameters.NO_VIEWS = info2.pvm.matrix(2);
+parameters.NO_VIEWS = double(info2.pvm.matrix(2));
 
 
 % Phase encoding orientation
 parameters.PHASE_ORIENTATION = 1;
 pm1 = -1;
 pm2 = -1;
-
 
 % Determine how to flip the data for different orientations
 if isfield(info2.pvm,'spackarrreadorient')
@@ -52,7 +51,7 @@ if isfield(info2.pvm,'spackarrreadorient')
         pm2 = -1;
     end
     if strcmp(info2.pvm.spackarrreadorient(1:3),'A_P')
-        parameters.PHASE_ORIENTATION = 1;
+        parameters.PHASE_ORIENTATION = 0;
         flr =  0;
         pm1 = -1;
         pm2 = -1;
@@ -85,6 +84,7 @@ parameters.te = parameters.echotimes(1);
 parameters.NO_ECHOES = length(parameters.echotimes);
 parameters.alpha = str2num(info1.acq.flip_angle);
 parameters.NO_AVERAGES = str2num(info1.NA);
+parameters.tr_extra_us = 0;
 
 
 % Other parameters

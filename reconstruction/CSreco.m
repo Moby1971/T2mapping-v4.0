@@ -49,7 +49,7 @@ sensitivities = ones(size(kSpacePics));
 
 
 % Pics command
-picsCommand = 'pics -RW:6:0:0.001 -RT:1024:0:0.1 ';
+picsCommand = 'pics -RW:6:0:0.01 -RT:1024:0:0.1';
 
 
 % Bart reconstruction
