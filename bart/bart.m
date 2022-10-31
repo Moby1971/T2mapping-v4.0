@@ -60,6 +60,11 @@ if ispc
         end
     end
 
+    % Return Version
+    if contains(cmd,"version")
+        app.bartVersion = cmdout;
+    end
+
     for i=1:nargout
         if ERR==0
             if contains(cmd,"estdelay") || contains(cmd,"-Rh") 
@@ -154,9 +159,15 @@ if ismac
         end
     end
 
+    % Return Version
+    if contains(cmd,"version")
+        app.bartVersion = cmdout;
+    end
+
+    % Output
     for i=1:nargout
         if ERR==0
-            if contains(cmd,"estdelay") || contains(cmd,"-Rh")
+            if contains(cmd,"estdelay") || contains(cmd,"-Rh") 
                 varargout{1} = cmdout;
             else
                 varargout{i} = readcfl(out{i}); %#ok<*AGROW> 
