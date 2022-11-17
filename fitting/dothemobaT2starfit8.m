@@ -17,8 +17,7 @@ tes = app.tes;
 tes(delements) = [];
 kSpace(:,delements,:,:,:) = [];
 
-disp(size(kSpace))
-
+clc;
 
 % Bart dimensions
 % 	READ_DIM,       1   z  
@@ -40,7 +39,7 @@ disp(size(kSpace))
 
 %                            0  1  2  3  4  5  6  7  8  9  10 11 12 13
 %                            1  2  3  4  5  6  7  8  9  10 11 12 13 14
-kSpacePics = permute(kSpace,[6 ,3 ,4 ,1 ,7 ,2 ,8 ,9 ,10,11,5, 12,13,14]);
+kSpacePics = permute(kSpace,[6 ,3 ,4 ,1 ,7 ,2 ,8 ,9 ,10,11,12,5, 13,14]);
 
 
 % Do a simple bart reconstruction of the individual images first
@@ -60,8 +59,8 @@ disp(size(kSpacePics))
 % Prepare the echo times matrix
 % In the test files in Bart the TE's are mulitplied by 0.01, not 0.001
 % There seems to be a scaling factor of 10
-for dynamic = 1:size(kSpacePics,11)
-    TE(1,1,1,1,1,:,1,1,1,1,dynamic) = tes*0.001; %#ok<AGROW> 
+for dynamic = 1:size(kSpacePics,12)
+    TE(1,1,1,1,1,:,1,1,1,1,1,dynamic) = tes*0.001; %#ok<AGROW> 
 end
 
 disp(size(TE))
@@ -78,8 +77,10 @@ disp(size(TE))
 % I could not get the actual T2* fit working
 % After phase-correction, I therefore used the TSE fit to extract a monoexponential decay constant
 
-bartCommand = 'moba -F -d4 -l1 -i8 -C100 -rS:0 -rT:38:0:0.001 --kfilter-1 -n';
+bartCommand = 'moba -F -d4 -l1 -i8 -C100 -rS:0 -J -rT:38:0:0.001 --kfilter-1 -n';
 t2Fit = abs(bart(app,bartCommand,kSpacePics,TE));
+
+disp(size(t2Fit))
 
 
 % Extract M0 map
