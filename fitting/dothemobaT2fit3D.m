@@ -6,9 +6,10 @@ function [m0MapOut, t2MapOut] = dothemobaT2fit3D(app, dynamic)
 % Gustav Strijkers
 % Amsterdam UMC
 % g.j.strijkers@amsterdamumc.nl
-% 08/12/2022
+% 05/03/2022
 %
 % ---------------------------------------------------------------------------------
+
 
 
 % Multicoil data
@@ -41,7 +42,6 @@ kSpace(:,delements,:,:) = [];
 % 	SLICE_DIM,      14  slices
 % 	AVG_DIM,        15
 
-
 %                            0  1  2  3  4  5  6  7  8  9  10 11 12 13
 %                            1  2  3  4  5  6  7  8  9  10 11 12 13 14
 kSpacePics = permute(kSpace,[3 ,4 ,5 ,1 ,8 ,2 ,9 ,10,11,12,6 ,13,14,7 ]);
@@ -51,19 +51,16 @@ sensitivities = ones(size(kSpacePics));
 picsCommand = 'pics -RW:7:0:0.001 ';
 images = bart(app,picsCommand,kSpacePics,sensitivities);
 
-clc;
-
-disp('images')
-disp(size(images))
+%disp('images')
+%disp(size(images))
 
 % Do a phase correction
 phaseImage = angle(images);
 images = images.*exp(-1i.*phaseImage);
 kSpacePics = bart(app,'fft -u 7',images);
 
-disp('kSpacePics')
-disp(size(kSpacePics))
-
+%disp('kSpacePics')
+%disp(size(kSpacePics))
 
 % Prepare the echo times matrix
 % In the test files in Bart the TE's are mulitplied by 0.01, not 0.001
@@ -79,40 +76,34 @@ TE(1,1,1,1,1,:) = tes*0.001;
 % -rS:0 = non-negative constraint
 %
 
-% I could not get the actual T2* fit working
-% After phase-correction, I therefore used the TSE fit to extract a monoexponential decay constant
-
 bartCommand = 'moba -F -d4 -l1 -i8 -C100 -rS:0 -rT:38:0:0.001 --kfilter-1 -n';
 t2Fit = abs(bart(app,bartCommand,kSpacePics,TE));
 
-
-
-disp('t2Fit')
-disp(size(t2Fit))
-
+%disp('t2Fit')
+%disp(size(t2Fit))
 
 % Extract M0 map
 m0MapOut = flip(squeeze(t2Fit(:,:,:,1,1,1,1)),2);
 
-disp('m0MapOut')
-disp(size(m0MapOut))
+%disp('m0MapOut')
+%disp(size(m0MapOut))
 
 % Extract T2 map in ms
 t2MapOut = 100./flip(squeeze(t2Fit(:,:,:,1,1,1,2)),2);
 t2MapOut(isinf(t2MapOut)) = 0;
 t2MapOut(isnan(t2MapOut)) = 0;
 
-disp('t2MapOut')
-disp(size(m0MapOut))
+%disp('t2MapOut')
+%disp(size(m0MapOut))
 
 % Remove outliers
 t2MapOut(t2MapOut < 0.1) = 0;
-t2MapOut(t2MapOut > 1000) = 0;
+t2MapOut(t2MapOut > 5000) = 0;
 m0MapOut(t2MapOut < 0.1) = 0;
-m0MapOut(t2MapOut > 1000) = 0;
+m0MapOut(t2MapOut > 5000) = 0;
 
-disp('mask')
-disp(size(squeeze(app.mask(:,:,:,dynamic))));
+%disp('mask')
+%disp(size(squeeze(app.mask(:,:,:,dynamic))));
 
 % Masking
 t2MapOut = t2MapOut.*squeeze(app.mask(:,:,:,dynamic));
