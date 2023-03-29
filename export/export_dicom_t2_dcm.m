@@ -12,6 +12,8 @@ function export_dicom_t2_dcm(directory,dcm_files_path,m0map,t2map,r2map,paramete
 %
 %------------------------------------------------------------
 
+scaling = 100; % mulitply T2 values with this factor to prevent discretization
+
 % Phase orientation correction
 if isfield(parameters, 'PHASE_ORIENTATION')
     if parameters.PHASE_ORIENTATION == 1
@@ -94,7 +96,7 @@ for dynamic = 1:dimd
 
         fname = [output_directory1,filesep,'T2-slice',fn,'-dynamic',dn,'.dcm'];
        
-        image = rot90(squeeze(cast(round(t2map(:,:,slice,dynamic)),'uint16')));
+        image = rot90(squeeze(cast(round(scaling*t2map(:,:,slice,dynamic)),'uint16')));
 
         dicomwrite(image, fname, dcm_header{slice,dynamic});
 
@@ -148,7 +150,7 @@ for dynamic = 1:dimd
         dn = dn(size(dn,2)-4:size(dn,2));
 
         fname = [output_directory3,filesep,'R2-slice',fn,'-dynamic',dn,'.dcm'];
-        image = rot90(squeeze(cast(round(100*r2map(:,:,slice,dynamic)),'uint16')));
+        image = rot90(squeeze(cast(round(scaling*r2map(:,:,slice,dynamic)),'uint16')));
      
         dicomwrite(image, fname, dcm_header{slice,dynamic});
 

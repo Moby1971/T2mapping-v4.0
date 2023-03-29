@@ -1,5 +1,18 @@
 function export_dicom_t2(directory,m0map,t2map,r2map,parameters,tag)
 
+%------------------------------------------------------------
+%
+% DICOM EXPORT OF T2 MAPS
+% DICOM HEADER INFORMATION NOT AVAILABLE
+%
+% Gustav Strijkers
+% Amsterdam UMC
+% g.j.strijkers@amsterdamumc.nl
+% 29/3/2023
+%
+%------------------------------------------------------------
+
+scaling = 100; % mulitply T2 values with this factor to prevent discretization
 
 % create folder if not exist, and clear
 folder_name = [directory,[filesep,'T2map-DICOM-',tag]];
@@ -39,7 +52,7 @@ for dynamic = 1:dimd
         dn = dn(size(dn,2)-4:size(dn,2));
 
         fname = [directory,filesep,'T2map-DICOM-',tag,filesep,'T2map-slice',fn,'-dynamic',dn,'.dcm'];
-        image = rot90(squeeze(cast(round(t2map(:,:,slice,dynamic)),'uint16')));
+        image = rot90(squeeze(cast(round(scaling*t2map(:,:,slice,dynamic)),'uint16')));
         dicomwrite(image, fname, dcm_header);
 
     end
@@ -88,7 +101,7 @@ for dynamic = 1:dimd
         dn = dn(size(dn,2)-4:size(dn,2));
 
         fname = [directory,filesep,'T2map-DICOM-',tag,filesep,'R2map-slice',fn,'-dynamic',dn,'.dcm'];
-        image = rot90(squeeze(cast(round(100*r2map(:,:,slice,dynamic)),'uint16')));
+        image = rot90(squeeze(cast(round(scaling*r2map(:,:,slice,dynamic)),'uint16')));
         dicomwrite(image, fname, dcm_header);
 
     end
