@@ -27,6 +27,11 @@ else
     delay_time = 2/dimz;
 end
 
+if ~exist(gifexportpath, 'dir')
+    mkdir(gifexportpath); 
+end
+delete(strcat(gifexportpath,filesep,'*'));
+
 
 % ----------------------------------
 % Export the T2 maps to gifs
@@ -39,7 +44,7 @@ if dimd > 1
 
         for dynamic = 1:dimd
 
-            image = uint8(round((255/T2MapScale)*resizem(squeeze(t2map(:,:,slice,dynamic)),[numrows numcols])));
+            image = uint8(round((255/T2MapScale)*resizem(squeeze(t2map(:,:,slice,dynamic)),[numrows numcols]))); %#ok<*RESZM> 
 
             if isfield(parameters, 'PHASE_ORIENTATION')
                 if parameters.PHASE_ORIENTATION
@@ -48,9 +53,9 @@ if dimd > 1
             end
 
             if dynamic == 1
-                imwrite(rot90(image),t2cmap,[gifexportpath,filesep,'t2map-slice',num2str(slice),'-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
+                imwrite(rot90(image),t2cmap,strcat(gifexportpath,filesep,'t2map-slice',num2str(slice),'-',tag,'.gif'),'DelayTime',delay_time,'LoopCount',inf);
             else
-                imwrite(rot90(image),t2cmap,[gifexportpath,filesep,'t2map-slice',num2str(slice),'-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
+                imwrite(rot90(image),t2cmap,strcat(gifexportpath,filesep,'t2map-slice',num2str(slice),'-',tag,'.gif'),'WriteMode','append','DelayTime',delay_time);
             end
         end
 
@@ -70,9 +75,9 @@ else
         end
 
         if slice == 1
-            imwrite(rot90(image),t2cmap,[gifexportpath,filesep,'t2map-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
+            imwrite(rot90(image),t2cmap,strcat(gifexportpath,filesep,'t2map-',tag,'.gif'),'DelayTime',delay_time,'LoopCount',inf);
         else
-            imwrite(rot90(image),t2cmap,[gifexportpath,filesep,'t2map-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
+            imwrite(rot90(image),t2cmap,strcat(gifexportpath,filesep,'t2map-',tag,'.gif'),'WriteMode','append','DelayTime',delay_time);
         end
     end
 
@@ -96,7 +101,9 @@ if dimd > 1
 
             % determine a convenient scale to display M0 maps (same as in the app)
             m0scale = round(2*mean(nonzeros(squeeze(m0map(:,:,slice,dynamic)))));
-            if isnan(m0scale) m0scale = 100; end
+            if isnan(m0scale) 
+                m0scale = 100; 
+            end
 
             % automatic grayscale mapping is used for the gif export
             % the m0map therefore needs to be mapped onto the range of [0 255]
@@ -109,9 +116,9 @@ if dimd > 1
             end
 
             if dynamic == 1
-                imwrite(rot90(image),m0cmap,[gifexportpath,filesep,'m0map-slice',num2str(slice),'-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
+                imwrite(rot90(image),m0cmap,strcat(gifexportpath,filesep,'m0map-slice',num2str(slice),'-',tag,'.gif'),'DelayTime',delay_time,'LoopCount',inf);
             else
-                imwrite(rot90(image),m0cmap,[gifexportpath,filesep,'m0map-slice',num2str(slice),'-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
+                imwrite(rot90(image),m0cmap,strcat(gifexportpath,filesep,'m0map-slice',num2str(slice),'-',tag,'.gif'),'WriteMode','append','DelayTime',delay_time);
             end
 
         end
@@ -125,7 +132,9 @@ else
 
         % determine a convenient scale to display M0 maps (same as in the app)
         m0scale = round(2*mean(nonzeros(squeeze(m0map(:,:,slice)))));
-        if isnan(m0scale) m0scale = 100; end
+        if isnan(m0scale) 
+            m0scale = 100; 
+        end
 
         % automatic grayscale mapping is used for the gif export
         % the m0map therefore needs to be mapped onto the range of [0 255]
@@ -138,9 +147,9 @@ else
         end
 
         if slice == 1
-            imwrite(rot90(image),m0cmap,[gifexportpath,filesep,'m0map-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
+            imwrite(rot90(image),m0cmap,strcat(gifexportpath,filesep,'m0map-',tag,'.gif'),'DelayTime',delay_time,'LoopCount',inf);
         else
-            imwrite(rot90(image),m0cmap,[gifexportpath,filesep,'m0map-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
+            imwrite(rot90(image),m0cmap,strcat(gifexportpath,filesep,'m0map-',tag,'.gif'),'WriteMode','append','DelayTime',delay_time);
         end
 
     end
@@ -177,9 +186,9 @@ if dimd > 1
             end
 
             if dynamic == 1
-                imwrite(rot90(image),r2cmap,[gifexportpath,filesep,'r2map-slice',num2str(slice),'-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
+                imwrite(rot90(image),r2cmap,strcat(gifexportpath,filesep,'r2map-slice',num2str(slice),'-',tag,'.gif'),'DelayTime',delay_time,'LoopCount',inf);
             else
-                imwrite(rot90(image),r2cmap,[gifexportpath,filesep,'r2map-slice',num2str(slice),'-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
+                imwrite(rot90(image),r2cmap,strcat(gifexportpath,filesep,'r2map-slice',num2str(slice),'-',tag,'.gif'),'WriteMode','append','DelayTime',delay_time);
             end
 
         end
@@ -203,9 +212,9 @@ else
         end
 
         if slice == 1
-            imwrite(rot90(image),r2cmap,[gifexportpath,filesep,'r2map-',tag,'.gif'],'DelayTime',delay_time,'LoopCount',inf);
+            imwrite(rot90(image),r2cmap,strcat(gifexportpath,filesep,'r2map-',tag,'.gif'),'DelayTime',delay_time,'LoopCount',inf);
         else
-            imwrite(rot90(image),r2cmap,[gifexportpath,filesep,'r2map-',tag,'.gif'],'WriteMode','append','DelayTime',delay_time);
+            imwrite(rot90(image),r2cmap,strcat(gifexportpath,filesep,'r2map-',tag,'.gif'),'WriteMode','append','DelayTime',delay_time);
         end
 
     end
