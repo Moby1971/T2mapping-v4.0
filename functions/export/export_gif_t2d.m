@@ -30,7 +30,6 @@ end
 if ~exist(gifexportpath, 'dir')
     mkdir(gifexportpath); 
 end
-delete(strcat(gifexportpath,filesep,'*'));
 
 
 % ----------------------------------
