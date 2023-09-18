@@ -76,8 +76,6 @@ if (~exist(output_directory3, 'dir'))
 end
 delete([output_directory3,filesep,'*']);
 
-disp(output_directory1)
-
 % Export the T2 map Dicoms
 for dynamic = 1:dimd
 
