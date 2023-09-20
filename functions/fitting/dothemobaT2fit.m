@@ -2,12 +2,25 @@ function [m0MapOut, t2MapOut] = dothemobaT2fit(app, slice, dynamic)
 
 % -----------------------------------------------------------------------
 % Performs a model-based T2 map fitting of multi-echo data for 1 slice
+% Gustav Strijkers
+% 20 Sept 2023
 % -----------------------------------------------------------------------
 
 
-% Multicoil data
-for k = 1:app.nrCoils
-    kSpace(k,:,:,:) = squeeze(app.data{k}(:,:,:,slice,dynamic)); %#ok<AGROW> 
+if app.validRegFlag
+
+    % Reconstruct the k-space back from the registered images
+    for echo = 1:size(app.images,1)
+        kSpace(1,echo,:,:) = ifft2reco(squeeze(app.images(echo,:,:,slice,dynamic))); %#ok<*AGROW> 
+    end
+
+else
+
+    % Original multicoil k-space data
+    for coil = 1:app.nrCoils
+        kSpace(coil,:,:,:) = squeeze(app.data{coil}(:,:,:,slice,dynamic)); 
+    end
+
 end
 
 
@@ -39,6 +52,19 @@ kSpace(:,delements,:,:) = [];
 %                            0  1  2  3  4  5  6  7  8  9  10 11 12 13
 %                            1  2  3  4  5  6  7  8  9  10 11 12 13 14
 kSpacePics = permute(kSpace,[6 ,3 ,4 ,1 ,7 ,2 ,8 ,9 ,10,11,12,13,14,5 ]);
+
+
+% Do a simple bart reconstruction of the individual images first
+sensitivities = ones(size(kSpacePics));
+picsCommand = 'pics -RW:6:0:0.001 ';
+images = bart(app,picsCommand,kSpacePics,sensitivities);
+
+
+% Do a phase correction
+phaseImage = angle(images);
+images = images.*exp(-1i.*phaseImage);
+kSpacePics = bart(app,'fft -u 6',images);
+
 
 
 % Prepare the echo times matrix

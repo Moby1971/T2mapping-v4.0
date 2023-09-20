@@ -2,12 +2,24 @@ function [m0MapOut, t2MapOut] = dothemobaT2starfit(app, slice, dynamic)
 
 % ---------------------------------------------------------------------------------
 % Performs a model-based T2* map fitting of multi-gradient-echo data for 1 slice
+% Gustav Strijkers
+% 20 Sept 2023
 % ---------------------------------------------------------------------------------
 
+if app.validRegFlag
 
-% Multicoil data
-for k = 1:app.nrCoils
-    kSpace(k,:,:,:) = squeeze(app.data{k}(:,:,:,slice,dynamic)); %#ok<AGROW> 
+    % Reconstruct the k-space back from the registered images
+    for echo = 1:size(app.images,1)
+        kSpace(1,echo,:,:) = ifft2reco(squeeze(app.images(echo,:,:,slice,dynamic))); %#ok<*AGROW> 
+    end
+
+else
+
+    % Original multicoil k-space data
+    for coil = 1:app.nrCoils
+        kSpace(coil,:,:,:) = squeeze(app.data{coil}(:,:,:,slice,dynamic)); 
+    end
+
 end
 
 

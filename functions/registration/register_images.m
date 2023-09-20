@@ -1,33 +1,38 @@
-function images_out = register_images(app,images_in)
+function imagesOut = register_images(app,imagesIn)
 
+% Registration of multi-echo images
 
-[ne,~,~,ns] = size(images_in);
+[nEchoes,~,~,nrSlices] = size(imagesIn);
 
 [optimizer, metric] = imregconfig('multimodal');
 
-norm = ns*(ne-1);
+norm = nrSlices*(nEchoes-1);
 
-for j = 1:ns
+for slice = 1:nrSlices
 
-    for i = 2:ne
-        
-        image0 = squeeze(images_in(1,:,:,j));
-        image1 = squeeze(images_in(i,:,:,j));
-        
-        max0 = max(image0(:));
-        max1 = max(image1(:));
-        
-        [image2] = imregister(image1/max1,image0/max0,'similarity',optimizer, metric,'DisplayOptimization',0);
-        
-        images_in(i,:,:,j) = image2*max1;
-        
-        app.RegProgressGauge.Value = round(100*((j-1)*(ne-1) + (i-1))/norm);
+    for echo = 2:nEchoes
+
+        % Fixed and moving image
+        image0 = squeeze(imagesIn(1,:,:,slice));
+        image1 = squeeze(imagesIn(echo,:,:,slice));
+
+        % Threshold
+        threshold = graythresh(mat2gray(image0)) * max(image0(:));
+        image0(image0 < threshold) = 0;
+        image1(image0 < threshold) = 0;
+
+        % Register
+        image2 = imregister(image1,image0,'rigid',optimizer, metric,'DisplayOptimization',0);
+        imagesIn(echo,:,:,slice) = image2;
+
+        % Progress gauge
+        app.RegProgressGauge.Value = round(100*((slice-1)*(nEchoes-1) + (echo-1))/norm);
         drawnow;
-        
+
     end
-    
+
 end
 
-images_out = images_in;
+imagesOut = imagesIn;
 
 end
