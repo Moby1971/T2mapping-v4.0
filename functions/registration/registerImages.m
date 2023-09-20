@@ -1,6 +1,8 @@
-function imagesOut = registerImages(app,imagesIn)
+function registerImages(app)
 
 % Registration of multi-echo images
+
+imagesIn = app.images;
 
 [nEchoes,~,~,nrSlices] = size(imagesIn);
 
@@ -17,8 +19,18 @@ try
         setenv('PATH', result);
     end
 
-    regParDir = dir(which('regPars.txt'));
-    regParFile = strcat(regParDir.folder,filesep,'regPars.txt');
+    switch app.RegistrationDropDown.Value
+        case 'Translation'
+            fileName = 'regParsTrans.txt';
+        case 'Rigid'
+            fileName = 'regParsRigid.txt';
+        case 'Affine'
+            fileName = 'regParsAffine.txt';
+        case 'B-Spline'
+            fileName = 'regParsBSpline.txt';
+    end
+    regParDir = dir(which(fileName));
+    regParFile = strcat(regParDir.folder,filesep,fileName);
 
     norm = nrSlices*(nEchoes-1);
 
@@ -55,6 +67,17 @@ catch ME
 
     [optimizer, metric] = imregconfig('multimodal');
 
+    switch app.RegistrationDropDown.Value
+        case 'Translation'
+            method = 'translation';
+        case 'Rigid'
+            method = 'rigid';
+        case 'Affine'
+            method = 'similarity';
+        case 'B-Spline'
+            method = 'affine';
+    end
+
     norm = nrSlices*(nEchoes-1);
 
     for slice = 1:nrSlices
@@ -71,7 +94,7 @@ catch ME
             image1(image0 < threshold) = 0;
 
             % Register
-            image2 = imregister(image1,image0,'rigid',optimizer, metric,'DisplayOptimization',0);
+            image2 = imregister(image1,image0,method,optimizer, metric,'DisplayOptimization',0);
 
             % New registered image
             imagesIn(echo,:,:,slice) = image2;
@@ -86,6 +109,6 @@ catch ME
 
 end
 
-imagesOut = imagesIn;
+app.images = imagesIn;
 
 end
