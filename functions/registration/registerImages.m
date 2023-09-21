@@ -11,14 +11,6 @@ app.TextMessage('Image registration ...');
 
 try
 
-    % Elastix
-
-    if ismac || isunix
-        [~, result] = system('echo -n $PATH');
-        result = [result ':/usr/local/bin:/usr/local/lib'];
-        setenv('PATH', result);
-    end
-
     switch app.RegistrationDropDown.Value
         case 'Translation'
             fileName = 'regParsTrans.txt';
@@ -29,14 +21,22 @@ try
         case 'B-Spline'
             fileName = 'regParsBSpline.txt';
     end
-    regParDir = dir(which(fileName));
-    regParFile = strcat(regParDir.folder,filesep,fileName);
+    [regParDir , ~] = fileparts(which(fileName));
+    regParFile = strcat(regParDir,filesep,fileName);
 
     norm = nrSlices*(nEchoes-1);
 
-    for slice = 1:nrSlices
+    slice = 0;
 
-        for echo = 2:nEchoes
+    while slice<nrSlices && ~app.abortRegFlag
+    
+        slice = slice + 1;
+
+        echo = 1;
+
+        while echo<nEchoes  && ~app.abortRegFlag
+
+            echo = echo + 1;
 
             % Fixed and moving image
             image0 = squeeze(imagesIn(1,:,:,slice));
@@ -63,7 +63,7 @@ catch ME
 
     % Matlab
 
-    app.TextMessage('Elastix failed, using Matlab ...');
+    app.TextMessage('Elastix failed, registering images using Matlab ...');
 
     [optimizer, metric] = imregconfig('multimodal');
 
@@ -80,9 +80,17 @@ catch ME
 
     norm = nrSlices*(nEchoes-1);
 
-    for slice = 1:nrSlices
+    slice = 0;
 
-        for echo = 2:nEchoes
+    while slice<nrSlices && ~app.abortRegFlag
+
+        slice = slice + 1;
+
+        echo = 1;
+
+        while echo<nEchoes  && ~app.abortRegFlag
+
+            echo = echo + 1;
 
             % Fixed and moving image
             image0 = squeeze(imagesIn(1,:,:,slice));

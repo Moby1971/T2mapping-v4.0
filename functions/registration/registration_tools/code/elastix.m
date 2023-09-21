@@ -6,54 +6,54 @@ function varargout=elastix(movingImage,fixedImage,outputDir,paramFile,varargin)
 % Purpose
 % Wrapper for elastix image registration package. This function calls the elastix
 % binary (needs to be in the system path) to conduct the registration and produce
-% the transformation coefficients. These are saved to disk and, optionally, 
+% the transformation coefficients. These are saved to disk and, optionally,
 % returned as a variable. Transformed images are returned.
 %
 %
 % Inputs [required]
-% movingImage - A 2D or 3D matrix corresponding to a 2D image or a 3D volume. 
+% movingImage - A 2D or 3D matrix corresponding to a 2D image or a 3D volume.
 %               This is the image that you want to align.
 %
-% fixedImage -  A 2D or 3D matrix corresponding to a 2D image or a 3D volume. 
+% fixedImage -  A 2D or 3D matrix corresponding to a 2D image or a 3D volume.
 %               Must have the same number of dimensions as movingImage.
 %               This is the target of the alignment. i.e. the image that you want
-%               movingImage to match. 
+%               movingImage to match.
 %
-% outputDir -   If empty, a temporary directory with a unique name is created 
+% outputDir -   If empty, a temporary directory with a unique name is created
 %               and deleted once the analysis is complete. If a *valid path* is entered
-%               then the directory is not deleted. If a directory is defined and it 
+%               then the directory is not deleted. If a directory is defined and it
 %               does not exist then a temporary one is created. The directory is *never deleted* if no
 %               outputs are requested.
 %
-% paramFile - a) A string defining the name of the YAML file that contains the registration 
-%             parameters. This is converted to an elastix parameter file. Leave empty to 
+% paramFile - a) A string defining the name of the YAML file that contains the registration
+%             parameters. This is converted to an elastix parameter file. Leave empty to
 %             use the default file supplied with this package (elastix_default.yml)
 %             Must end with ".yml" (Can be -1 to ignore this: see example below).
-%             b) An elastix parameter file name (relative or full path) or a cell array 
-%               of elastix parameter file names. If a cell array, these are applied in 
+%             b) An elastix parameter file name (relative or full path) or a cell array
+%               of elastix parameter file names. If a cell array, these are applied in
 %               order. Names must end with ".txt"
 %
 %
 % Inputs [optional]
-% paramstruct - structure containing parameter values for the registration. This is used 
-%          to modify specific parameters which may already have been defined by the .yml 
-%          (paramFile). paramstruct can be a cell array of length>1, in which case 
-%          these structures are treated as a request for multiple sequential registration 
-%          operations. The possible values for fields in the the structure can be found in 
-%          elastix_default.yml 
+% paramstruct - structure containing parameter values for the registration. This is used
+%          to modify specific parameters which may already have been defined by the .yml
+%          (paramFile). paramstruct can be a cell array of length>1, in which case
+%          these structures are treated as a request for multiple sequential registration
+%          operations. The possible values for fields in the the structure can be found in
+%          elastix_default.yml
 %          *paramstruct is ignored if paramFile is an elastix parameter file.*
 %
-% threads - How many threads to run the registration on. by default all available cores 
+% threads - How many threads to run the registration on. by default all available cores
 %           will be used.
-% t0      - Relative or absolute path(s) (string or cell array of strings) to files 
-%           defining the initial transform. If transforms are to be chained, list then 
+% t0      - Relative or absolute path(s) (string or cell array of strings) to files
+%           defining the initial transform. If transforms are to be chained, list then
 %           in reverse order (e.g. bspline then affine).
 %
 %
 %
 % Outputs
 % registered - the final registered image
-% stats - all stats from the registration, including any intermediate images produced 
+% stats - all stats from the registration, including any intermediate images produced
 %         during the registration.
 %
 %
@@ -61,13 +61,13 @@ function varargout=elastix(movingImage,fixedImage,outputDir,paramFile,varargin)
 % Examples
 % elastix('version')   %prints the version of elastix on your system and exits
 % elastix('help')      %prints the elastix binary's help and exits
-% 
+%
 % Basic:
-% elastix(movImage,refImage,'regDirName',{'./01_affine.txt','./02_bspline.txt}) 
+% elastix(movImage,refImage,'regDirName',{'./01_affine.txt','./02_bspline.txt})
 % elastix(movImage,refImage,[],'elastix_settings.yml')
 % elastix(movImage,refImage,[],'elastix_settings.yml', 'paramstruct', modifierStruct)
 %
-% Advanced - read two parameter files from disk. Modify one and feed in as a 
+% Advanced - read two parameter files from disk. Modify one and feed in as a
 %            a structre:
 %  PP{1}=elastix_parameter_read('01_affine.txt');
 %  PP{2}=elastix_parameter_read('02_bspline.txt');
@@ -78,10 +78,10 @@ function varargout=elastix(movingImage,fixedImage,outputDir,paramFile,varargin)
 %
 % Notes:
 % 1. You will need to download the elastix binaries (or compile the source)
-% from: http://elastix.isi.uu.nl/ There are versions for all platforms. 
-% 2. Not extensively tested on Windows. 
+% from: http://elastix.isi.uu.nl/ There are versions for all platforms.
+% 2. Not extensively tested on Windows.
 % 3. Read the elastix website and elastix_parameter_write.m to
-% learn more about the parameters that can be modified. 
+% learn more about the parameters that can be modified.
 %
 %
 % Rob Campbell - Basel 2015
@@ -116,7 +116,7 @@ if nargin==0
 end
 
 %If the user supplies one input argument only and this is is a string then
-%we assume it's a request for the help or version so we run it 
+%we assume it's a request for the help or version so we run it
 if nargin==1 && ischar(movingImage)
     if regexp(movingImage,'^\w')
         [~,msg]=system(['elastix --',movingImage]);
@@ -134,14 +134,14 @@ if ndims(movingImage) ~= ndims(fixedImage)
 end
 
 % Make directory into which we will write the image files and associated registration files
-if nargin<3 || isempty(outputDir) 
-    outputDir=fullfile(tempdir,sprintf('elastixTMP_%s_%d', datestr(now,'yymmddHHMMSS'), round(rand*1E8)));
+if nargin<3 || isempty(outputDir)
+    outputDir=fullfile(tempdir,sprintf('elastixTMP_%s_%d', datestr(now,'yymmddHHMMSS'), round(rand*1E8))); %#ok<*TNOW1,*DATST>
     deleteDirOnCompletion=1;
 else
     deleteDirOnCompletion=0;
 end
 
-if strcmp(outputDir(end),filesep) %Chop off any trailing fileseps 
+if strcmp(outputDir(end),filesep) %Chop off any trailing fileseps
     outputDir(end)=[];
 end
 
@@ -189,8 +189,8 @@ end
 
 %error check: confirm initial parameter files exist
 if ~isempty(t0)
-    if ischar(t0) 
-       t0 = {t0}; %just to make later code neater
+    if ischar(t0)
+        t0 = {t0}; %just to make later code neater
     end
 
     for ii = 1:length(t0)
@@ -214,7 +214,7 @@ end
 
 
 % Create and move the images
-movingFname=[dirName,'_moving']; %TODO: so the file name contains the dir name? 
+movingFname=[dirName,'_moving']; %TODO: so the file name contains the dir name?
 mhd_write(movingImage,movingFname);
 if ~strcmp(outputDir,'.')
     if ~movefile([movingFname,'.*'],outputDir); error('Can''t move files'), end
@@ -232,9 +232,9 @@ end
 
 %Build the parameter file(s)
 %modify settings from YAML with paramstruct
-if ~isempty(paramstruct) && (ischar(paramFile) && endsWith(paramFile,'.yml')) || (isnumeric(paramFile) && paramFile==-1) 
+if ~isempty(paramstruct) && (ischar(paramFile) && endsWith(paramFile,'.yml')) || (isnumeric(paramFile) && paramFile==-1)
     for ii=1:length(paramstruct)
-        paramFname{ii}=sprintf('%s_parameters_%d.txt',dirName,ii);
+        paramFname{ii}=sprintf('%s_parameters_%d.txt',dirName,ii); %#ok<*AGROW>
         paramFname{ii}=fullfile(outputDir,paramFname{ii});
         elastix_parameter_write(paramFname{ii},paramFile,paramstruct{ii})
     end
@@ -255,7 +255,7 @@ elseif (ischar(paramFile) && endsWith(paramFile,'.txt')) %we have an elastix par
 
 elseif iscell(paramFile) %we have a cell array of elastix parameter files
     paramFname = paramFile;
-     if ~strcmp(outputDir,'.') 
+    if ~strcmp(outputDir,'.')
         for ii=1:length(paramFname)
             copyfile(paramFname{ii},outputDir)
             %So paramFname is now:
@@ -269,7 +269,7 @@ else
 end
 
 
-%If the user asked for an initial transform, collate the transform files, copy them to the 
+%If the user asked for an initial transform, collate the transform files, copy them to the
 %transform directory, and ensure they are linked.
 if ~isempty(t0)
     copiedLocations = {}; %Keep track of the locations to which the files are stored
@@ -287,7 +287,7 @@ if ~isempty(t0)
         changeParameterInElastixFile(copiedLocations{ii},'InitialTransformParametersFileName',copiedLocations{ii+1},verbose)
     end
 
-    %Add the first parameter file to the command string 
+    %Add the first parameter file to the command string
     initCMD = sprintf(' -t0 %s ',copiedLocations{1});
 else
     initCMD = '';
@@ -296,9 +296,11 @@ end
 
 %Build the the appropriate command
 CMD=sprintf('elastix -f "%s.mhd" -m "%s.mhd" -out "%s" ',...
-            fullfile(outputDir,targetFname),...
-            fullfile(outputDir,movingFname),...
-            outputDir);
+    fullfile(outputDir,targetFname),...
+    fullfile(outputDir,movingFname),...
+    outputDir);
+
+
 CMD = [CMD,initCMD];
 
 
@@ -308,7 +310,7 @@ end
 
 
 %Loop through, adding each parameter file in turn to the string
-for ii=1:length(paramFname) 
+for ii=1:length(paramFname)
     CMD=[CMD,sprintf('-p "%s" ', paramFname{ii})];
 end
 
@@ -326,7 +328,7 @@ fclose(cmdFid);
 
 [status,result]=system(CMD);
 
-if status %Things failed. Oh dear. 
+if status %Things failed. Oh dear.
     if status
         %fprintf('\n\t*** Transform Failed! ***\n%s\n',result)
         %fprintf('\tYou may want to check out the Elastix FAQ: https://github.com/SuperElastix/elastix/wiki/FAQ\n')
@@ -336,14 +338,14 @@ if status %Things failed. Oh dear.
     registered=[];
     out.outputDir=outputDir;
     out.TransformParameters=nan;
-    out.TransformParametersFname=nan;    
+    out.TransformParametersFname=nan;
 
     if deleteDirOnCompletion
         %fprintf('Keeping temporary directory %s for debugging purposes\n',outputDir)
     end
 
 
-else %Things worked! So let's return stuff to the user 
+else %Things worked! So let's return stuff to the user
 
     if nargout>1
         %Return the transform parameters
@@ -409,10 +411,10 @@ end
 
 
 function im = getImage(fname)
-    % Load images of the correct type
-    [~,~,ext]=fileparts(fname);
-    if strcmp(ext,'.mhd')
-        im=mhd_read(fname);
-    elseif strcmp(ext,'.tif') || strcmp(ext,'.tiff') 
-        im = load3Dtiff(fname);
-    end
+% Load images of the correct type
+[~,~,ext]=fileparts(fname);
+if strcmp(ext,'.mhd')
+    im=mhd_read(fname);
+elseif strcmp(ext,'.tif') || strcmp(ext,'.tiff')
+    im = load3Dtiff(fname);
+end
