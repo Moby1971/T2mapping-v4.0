@@ -1,6 +1,10 @@
-function [m0map_out,t2map_out,r2map_out] = dotheT2fit_slice(inputImages,mask,tes,rSquare,teSelection)
+function [m0map_out,t2map_out,r2map_out] = dotheT2fit2D(inputImages,mask,tes,rSquare,teSelection)
 
-% performs the T2 map fitting for 1 slice
+% -----------------------------------------------------------------------
+% Performs a T2 map fitting of multi-echo data for 1 slice
+% Gustav Strijkers
+% 24 Sept 2023
+% -----------------------------------------------------------------------
 
 
 % image dimensions
@@ -34,12 +38,12 @@ parfor j=1:dimx
             b = x\y;
             
             % make the maps
-            m0map(j,k) = exp(b(1));
+            m0map(j,k) = exp(b(1)); %#ok<PFOUS>
             t2map(j,k) = -1/b(2);
             
             % R2 map
             yCalc2 = x * b;
-            r2map(j,k) = 1 - sum((y - yCalc2).^2)/sum((y - mean(y)).^2);
+            r2map(j,k) = 1 - sum((y - yCalc2).^2)/sum((y - mean(y)).^2); %#ok<PFOUS>
             
             % check for low R-square
             if r2map(j,k) < rSquare
@@ -54,8 +58,23 @@ parfor j=1:dimx
     
 end
 
-t2map_out = t2map;
-m0map_out = m0map;    
-r2map_out = r2map;
+% Remove outliers
+m0map(t2map < 0) = 0;
+m0map(t2map > 5000) = 0;
+r2map(t2map < 0) = 0;
+r2map(t2map > 5000) = 0;
+t2map(t2map < 0) = 0;
+t2map(t2map > 5000) = 0;
+m0map(isnan(t2map)) = 0;
+r2map(isnan(t2map)) = 0;
+t2map(isnan(t2map)) = 0;
+m0map(isinf(t2map)) = 0;
+r2map(isinf(t2map)) = 0;
+t2map(isinf(t2map)) = 0;
+
+% Return the maps
+t2map_out = abs(t2map);
+m0map_out = abs(m0map);    
+r2map_out = abs(r2map);
     
 end

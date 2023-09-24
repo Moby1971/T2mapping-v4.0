@@ -1,6 +1,11 @@
-function [m0_out,t2_out,r2_out] = dotheT2fit_single(input_intensities,tes,~,te_selection)
+function [m0_out,t2_out,r2_out] = dotheT2fitSingle(input_intensities,tes,~,te_selection)
 
-% performs the T2 map fitting for 1 point or mean ROI value
+% -----------------------------------------------------------------------
+% Performs a T2 map fit of multi-echo data for 1 pixel
+% Gustav Strijkers
+% 24 Sept 2023
+% -----------------------------------------------------------------------
+
 
 % drop the TEs that are deselected in the app
 delements = find(te_selection==0);

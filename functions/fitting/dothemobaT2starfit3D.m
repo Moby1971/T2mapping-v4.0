@@ -1,4 +1,4 @@
-function [m0MapOut, t2MapOut] = dothemobaT2starfit3D(app, dynamic)
+function [m0map, t2map] = dothemobaT2starfit3D(app, dynamic)
 
 % ---------------------------------------------------------------------------------
 % Performs a model-based T2* map fitting of 3D multi-echo gradient-echo data
@@ -6,7 +6,7 @@ function [m0MapOut, t2MapOut] = dothemobaT2starfit3D(app, dynamic)
 % Gustav Strijkers
 % Amsterdam UMC
 % g.j.strijkers@amsterdamumc.nl
-% 20 sept 2023
+% 24 sept 2023
 %
 % ---------------------------------------------------------------------------------
 
@@ -94,25 +94,27 @@ t2Fit = abs(bart(app,bartCommand,kSpacePics,TE));
 
 
 % Extract M0 map
-m0MapOut = flip(squeeze(t2Fit(:,:,:,1,1,1,1)),2);
+m0map = flip(squeeze(t2Fit(:,:,:,1,1,1,1)),2);
 
 
 % Extract T2 map in ms
-t2MapOut = 100./flip(squeeze(t2Fit(:,:,:,1,1,1,2)),2);
-t2MapOut(isinf(t2MapOut)) = 0;
-t2MapOut(isnan(t2MapOut)) = 0;
+t2map = 100./flip(squeeze(t2Fit(:,:,:,1,1,1,2)),2);
 
 
 % Remove outliers
-t2MapOut(t2MapOut < 0.1) = 0;
-t2MapOut(t2MapOut > 5000) = 0;
-m0MapOut(t2MapOut < 0.1) = 0;
-m0MapOut(t2MapOut > 5000) = 0;
+m0map(t2map < 0) = 0;
+m0map(t2map > 5000) = 0;
+t2map(t2map < 0) = 0;
+t2map(t2map > 5000) = 0;
+m0map(isnan(t2map)) = 0;
+t2map(isnan(t2map)) = 0;
+m0map(isinf(t2map)) = 0;
+t2map(isinf(t2map)) = 0;
 
 
 % Masking
-t2MapOut = t2MapOut.*squeeze(app.mask(:,:,:,dynamic));
-m0MapOut = m0MapOut.*squeeze(app.mask(:,:,:,dynamic));
+t2map = t2map.*squeeze(app.mask(:,:,:,dynamic));
+m0map = m0map.*squeeze(app.mask(:,:,:,dynamic));
 
 
 end

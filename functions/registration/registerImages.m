@@ -24,12 +24,18 @@ try
     [regParDir , ~] = fileparts(which(fileName));
     regParFile = strcat(regParDir,filesep,fileName);
 
-    norm = nrSlices*(nEchoes-1);
+    % Timing parameters
+    app.EstimatedFitTimeViewField.Value = 'Calculating ...';
+    elapsedTime = 0;
+    totalNumberOfSteps = nrSlices*(nEchoes-1);
+    app.RegProgressGauge.Value = 0;
+    app.abortRegFlag = false;
+    cnt = 1;
 
     slice = 0;
 
     while slice<nrSlices && ~app.abortRegFlag
-    
+
         slice = slice + 1;
 
         echo = 1;
@@ -38,24 +44,37 @@ try
 
             echo = echo + 1;
 
+            tic;
+
             % Fixed and moving image
             image0 = squeeze(imagesIn(1,:,:,slice));
             image1 = squeeze(imagesIn(echo,:,:,slice));
 
             % Register
             image2 = elastix(image1,image0,[],regParFile);
-            
+
             % New registered image
             imagesIn(echo,:,:,slice) = image2;
 
-            % Progress gauge
-            app.RegProgressGauge.Value = round(100*((slice-1)*(nEchoes-1) + (echo-1))/norm);
+            % Update the registration progress gauge
+            app.RegProgressGauge.Value = round(100*(cnt/totalNumberOfSteps));
+
+            % Update the timing indicator
+            elapsedTime = elapsedTime + toc;
+            estimatedtotaltime = elapsedTime * totalNumberOfSteps / cnt;
+            timeRemaining = estimatedtotaltime * (totalNumberOfSteps - cnt) / totalNumberOfSteps;
+            timeRemaining(timeRemaining<0) = 0;
+            app.EstimatedRegTimeViewField.Value = strcat(datestr(seconds(timeRemaining),'MM:SS')," min:sec"); %#ok<*DATST>
             drawnow;
+
+            cnt = cnt+1;
 
         end
 
     end
 
+    app.TextMessage('Finished ... ');
+    app.EstimatedRegTimeViewField.Value = 'Finished ...';
 
 catch ME
 
@@ -78,7 +97,13 @@ catch ME
             method = 'affine';
     end
 
-    norm = nrSlices*(nEchoes-1);
+    % Timing parameters
+    app.EstimatedFitTimeViewField.Value = 'Calculating ...';
+    elapsedTime = 0;
+    totalNumberOfSteps = nrSlices*(nEchoes-1);
+    app.RegProgressGauge.Value = 0;
+    app.abortRegFlag = false;
+    cnt = 1;
 
     slice = 0;
 
@@ -91,6 +116,8 @@ catch ME
         while echo<nEchoes  && ~app.abortRegFlag
 
             echo = echo + 1;
+
+            tic;
 
             % Fixed and moving image
             image0 = squeeze(imagesIn(1,:,:,slice));
@@ -107,9 +134,18 @@ catch ME
             % New registered image
             imagesIn(echo,:,:,slice) = image2;
 
-            % Progress gauge
-            app.RegProgressGauge.Value = round(100*((slice-1)*(nEchoes-1) + (echo-1))/norm);
+            % Update the registration progress gauge
+            app.RegProgressGauge.Value = round(100*(cnt/totalNumberOfSteps));
+
+            % Update the timing indicator
+            elapsedTime = elapsedTime + toc;
+            estimatedtotaltime = elapsedTime * totalNumberOfSteps / cnt;
+            timeRemaining = estimatedtotaltime * (totalNumberOfSteps - cnt + 1) / totalNumberOfSteps;
+            timeRemaining(timeRemaining<0) = 0;
+            app.EstimatedRegTimeViewField.Value = strcat(datestr(seconds(timeRemaining),'MM:SS')," min:sec"); %#ok<*DATST>
             drawnow;
+
+            cnt = cnt+1;
 
         end
 
