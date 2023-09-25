@@ -25,7 +25,7 @@ try
     regParFile = strcat(regParDir,filesep,fileName);
 
     % Timing parameters
-    app.EstimatedFitTimeViewField.Value = 'Calculating ...';
+    app.EstimatedRegTimeViewField.Value = 'Calculating ...';
     elapsedTime = 0;
     totalNumberOfSteps = nrSlices*(nEchoes-1);
     app.RegProgressGauge.Value = 0;
@@ -98,7 +98,7 @@ catch ME
     end
 
     % Timing parameters
-    app.EstimatedFitTimeViewField.Value = 'Calculating ...';
+    app.EstimatedRegTimeViewField.Value = 'Calculating ...';
     elapsedTime = 0;
     totalNumberOfSteps = nrSlices*(nEchoes-1);
     app.RegProgressGauge.Value = 0;
@@ -140,7 +140,7 @@ catch ME
             % Update the timing indicator
             elapsedTime = elapsedTime + toc;
             estimatedtotaltime = elapsedTime * totalNumberOfSteps / cnt;
-            timeRemaining = estimatedtotaltime * (totalNumberOfSteps - cnt + 1) / totalNumberOfSteps;
+            timeRemaining = estimatedtotaltime * (totalNumberOfSteps - cnt) / totalNumberOfSteps;
             timeRemaining(timeRemaining<0) = 0;
             app.EstimatedRegTimeViewField.Value = strcat(datestr(seconds(timeRemaining),'MM:SS')," min:sec"); %#ok<*DATST>
             drawnow;
@@ -150,6 +150,9 @@ catch ME
         end
 
     end
+
+    app.TextMessage('Finished ... ');
+    app.EstimatedRegTimeViewField.Value = 'Finished ...';
 
 end
 
