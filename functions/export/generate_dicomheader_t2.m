@@ -10,7 +10,6 @@ function dicom_header = generate_dicomheader_t2(parameters,slice,dynamic,dimx,di
 %
 %
 
-disp(parameters.SLICE_INTERLEAVE)
 
 try
     studyname = str2num(parameters.filename(end-9:end-6)); %#ok<ST2NM> 

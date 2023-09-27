@@ -14,24 +14,13 @@ function export_dicom_t2(directory,m0map,t2map,r2map,parameters,tag)
 
 scaling = 100; % mulitply T2 values with this factor to prevent discretization
 
-% create folder if not exist, and clear
-folder_name1 = strcat(directory,filesep,"DICOM",filesep,"T2map-",tag);
-if ~exist(folder_name1, 'dir')
-    mkdir(folder_name1); 
-end
-delete(strcat(folder_name1,filesep,'*'));
 
-folder_name2 = strcat(directory,filesep,"DICOM",filesep,"M0map-",tag);
-if ~exist(folder_name2, 'dir')
-    mkdir(folder_name2); 
-end
-delete(strcat(folder_name2,filesep,'*'));
+% Create folder if not exist, and clear
+folder_name = strcat(directory,filesep,'T2map-DICOM-',tag);
+if ~exist(folder_name, 'dir') 
+    mkdir(folder_name); end
+delete(strcat(folder_name,filesep,'*'));
 
-folder_name3 = strcat(directory,filesep,"DICOM",filesep,"R2map-",tag);
-if ~exist(folder_name3, 'dir')
-    mkdir(folder_name3); 
-end
-delete(strcat(folder_name3,filesep,'*'));
 
 % Phase orientation correction
 if isfield(parameters, 'PHASE_ORIENTATION')
@@ -64,7 +53,7 @@ for dynamic = 1:dimd
         dn = strcat('0000',num2str(dynamic));
         dn = dn(size(dn,2)-4:size(dn,2));
 
-        fname = strcat(folder_name1,filesep,'T2map-slice',fn,'-dynamic',dn,'.dcm');
+        fname = strcat(folder_name,filesep,'T2map-slice',fn,'-dynamic',dn,'.dcm');
         image = rot90(squeeze(cast(round(scaling*t2map(:,:,slice,dynamic)),'uint16')));
         dicomwrite(image, fname, dcm_header);
 
@@ -89,7 +78,7 @@ for dynamic = 1:dimd
         dn = strcat('0000',num2str(dynamic));
         dn = dn(size(dn,2)-4:size(dn,2));
 
-        fname = strcat(folder_name2,filesep,'M0map-slice',fn,'-dynamic',dn,'.dcm');
+        fname = strcat(folder_name,filesep,'M0map-slice',fn,'-dynamic',dn,'.dcm');
         image = rot90(squeeze(cast(round(m0map(:,:,slice,dynamic)),'uint16')));
         dicomwrite(image, fname, dcm_header);
 
@@ -113,7 +102,7 @@ for dynamic = 1:dimd
         dn = strcat('0000',num2str(dynamic));
         dn = dn(size(dn,2)-4:size(dn,2));
 
-        fname = strcat(folder_name3,filesep,'R2map-slice',fn,'-dynamic',dn,'.dcm');
+        fname = strcat(folder_name,filesep,'R2map-slice',fn,'-dynamic',dn,'.dcm');
         image = rot90(squeeze(cast(round(scaling*r2map(:,:,slice,dynamic)),'uint16')));
         dicomwrite(image, fname, dcm_header);
 
