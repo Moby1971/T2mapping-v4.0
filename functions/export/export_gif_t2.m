@@ -28,7 +28,7 @@ else
 end
 
 if ~exist(gifexportpath, 'dir')
-    mkdir(gifexportpath); 
+    mkdir(gifexportpath);
 end
 
 
@@ -43,7 +43,7 @@ if dimd > 1
 
         for dynamic = 1:dimd
 
-            image = uint8(round((255/T2MapScale)*imresize(squeeze(t2map(:,:,slice,dynamic)),[numrows numcols]))); %#ok<*RESZM> 
+            image = uint8(round((255/T2MapScale)*imresize(squeeze(t2map(:,:,slice,dynamic)),[numrows numcols]))); %#ok<*RESZM>
 
             if isfield(parameters, 'PHASE_ORIENTATION')
                 if parameters.PHASE_ORIENTATION
@@ -99,14 +99,19 @@ if dimd > 1
         for dynamic = 1:dimd
 
             % determine a convenient scale to display M0 maps (same as in the app)
-            m0scale = round(2*mean(nonzeros(squeeze(m0map(:,:,slice,dynamic)))));
-            if isnan(m0scale) 
-                m0scale = 100; 
-            end
+            im = squeeze(m0map(:,:,slice,dynamic));
+            maxIm = max(im(:));
+            window = maxIm;
+            level = maxIm/2;
+
+            % Window and Level
+            im = (255/window)*(im - level + window/2);
+            im(im<0) = 0;
+            im(im>255) = 255;
 
             % automatic grayscale mapping is used for the gif export
             % the m0map therefore needs to be mapped onto the range of [0 255]
-            image = uint8(round((255/m0scale)*imresize(squeeze(m0map(:,:,slice,dynamic)),[numrows numcols])));
+            image = uint8(imresize(im,[numrows numcols]));
 
             if isfield(parameters, 'PHASE_ORIENTATION')
                 if parameters.PHASE_ORIENTATION
@@ -130,14 +135,19 @@ else
     for slice = 1:dimz
 
         % determine a convenient scale to display M0 maps (same as in the app)
-        m0scale = round(2*mean(nonzeros(squeeze(m0map(:,:,slice)))));
-        if isnan(m0scale) 
-            m0scale = 100; 
-        end
+        im = squeeze(m0map(:,:,slice));
+        maxIm = max(im(:));
+        window = maxIm;
+        level = maxIm/2;
+
+        % Window and Level
+        im = (255/window)*(im - level + window/2);
+        im(im<0) = 0;
+        im(im>255) = 255;
 
         % automatic grayscale mapping is used for the gif export
         % the m0map therefore needs to be mapped onto the range of [0 255]
-        image = uint8(round((255/m0scale)*imresize(squeeze(m0map(:,:,slice)),[numrows numcols])));
+        image = uint8(imresize(im,[numrows numcols]));
 
         if isfield(parameters, 'PHASE_ORIENTATION')
             if parameters.PHASE_ORIENTATION
@@ -167,7 +177,7 @@ r2map(r2map<0) = 0;
 r2map = r2map*(1/(1-rsquare));
 
 if dimd > 1
-    
+
     % Animated gif of dynamics
     for slice = 1:dimz
 

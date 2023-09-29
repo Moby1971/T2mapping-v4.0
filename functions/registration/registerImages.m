@@ -7,6 +7,7 @@ imagesIn = app.images;
 [nEchoes,~,~,nrSlices] = size(imagesIn);
 
 
+app.EstimatedRegTimeViewField.Value = 'Calculating ...';
 app.TextMessage('Image registration ...');
 
 try
@@ -25,7 +26,6 @@ try
     regParFile = strcat(regParDir,filesep,fileName);
 
     % Timing parameters
-    app.EstimatedRegTimeViewField.Value = 'Calculating ...';
     elapsedTime = 0;
     totalNumberOfSteps = nrSlices*(nEchoes-1);
     app.RegProgressGauge.Value = 0;
@@ -73,9 +73,6 @@ try
 
     end
 
-    app.TextMessage('Finished ... ');
-    app.EstimatedRegTimeViewField.Value = 'Finished ...';
-
 catch ME
 
     app.TextMessage(ME.message)
@@ -98,7 +95,6 @@ catch ME
     end
 
     % Timing parameters
-    app.EstimatedRegTimeViewField.Value = 'Calculating ...';
     elapsedTime = 0;
     totalNumberOfSteps = nrSlices*(nEchoes-1);
     app.RegProgressGauge.Value = 0;
@@ -151,10 +147,10 @@ catch ME
 
     end
 
-    app.TextMessage('Finished ... ');
-    app.EstimatedRegTimeViewField.Value = 'Finished ...';
-
 end
+
+app.EstimatedRegTimeViewField.Value = 'Finished ...';
+app.TextMessage('Finished ... ');
 
 % Renormalize
 imagesIn = 32767*imagesIn/max(imagesIn(:));
