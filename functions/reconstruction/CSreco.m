@@ -53,7 +53,29 @@ if app.data3dFlag
 
 
     % Pics command
-    picsCommand = 'pics -RW:7:0:0.01 -RT:1024:0:0.1';
+    picsCommand = 'pics';
+
+    if app.WVxyzEditField.Value > 0
+        picsCommand = [picsCommand,' -RW:7:0:',num2str(app.WVxyzEditField.Value)];
+    end
+
+    if app.TVxyzEditField.Value > 0
+        picsCommand = [picsCommand,' -RT:7:0:',num2str(app.TVxyzEditField.Value)];
+    end
+
+    if app.LLRxyzEditField.Value > 0
+        blocksize = round(size(kSpacePics,3)/16);
+        blocksize(blocksize < 8) = 8;
+        picsCommand = [picsCommand,' -RL:7:7:',num2str(app.LLRxyzEditField.Value),' -b',num2str(blocksize)];
+    end
+
+    if app.TVteEditField.Value > 0
+        picsCommand = [picsCommand,' -RT:32:0:',num2str(app.TVteEditField.Value)];
+    end
+
+    if app.TVdynEditField.Value > 0
+        picsCommand = [picsCommand,' -RT:1024:0:',num2str(app.TVdynEditField.Value)];
+    end
 
 
     % Bart reconstruction
@@ -73,8 +95,6 @@ if app.data3dFlag
     images = circshift(images,1,4);
     images = double(images);
 
-
-
 else
 
     % --- 2D ---
@@ -92,7 +112,29 @@ else
 
 
     % Pics command
-    picsCommand = 'pics -RW:6:0:0.01 -RT:1024:0:0.1';
+    picsCommand = 'pics';
+
+    if app.WVxyzEditField.Value > 0
+        picsCommand = [picsCommand,' -RW:6:0:',num2str(app.WVxyzEditField.Value)];
+    end
+
+    if app.TVxyzEditField.Value > 0
+        picsCommand = [picsCommand,' -RT:6:0:',num2str(app.TVxyzEditField.Value)];
+    end
+
+    if app.LLRxyzEditField.Value > 0
+        blocksize = round(size(kSpacePics,3)/16);
+        blocksize(blocksize < 8) = 8;
+        picsCommand = [picsCommand,' -RL:6:7:',num2str(app.LLRxyzEditField.Value),' -b',num2str(blocksize)];
+    end
+
+    if app.TVteEditField.Value > 0
+        picsCommand = [picsCommand,' -RT:32:0:',num2str(app.TVteEditField.Value)];
+    end
+
+    if app.TVdynEditField.Value > 0
+        picsCommand = [picsCommand,' -RT:1024:0:',num2str(app.TVdynEditField.Value)];
+    end
 
 
     % Bart reconstruction
