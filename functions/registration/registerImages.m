@@ -1,18 +1,27 @@
 function registerImages(app)
 
+
+
 % Registration of multi-echo images
 
 imagesIn = app.images;
 
 [nEchoes,~,~,nrSlices] = size(imagesIn);
 
-
 app.EstimatedRegTimeViewField.Value = 'Calculating ...';
 app.TextMessage('Image registration ...');
 
 try
 
+    % Temp directory for storing registration files
+    outputDir = tempdir;
+    app.TextMessage(strcat("Scratch folder = ",outputDir));
+
+    [~,elastix_version] = system('elastix --version');
+    app.TextMessage(elastix_version);
+
     switch app.RegistrationDropDown.Value
+        
         case 'Translation'
             fileName = 'regParsTrans.txt';
         case 'Rigid'
@@ -22,6 +31,7 @@ try
         case 'B-Spline'
             fileName = 'regParsBSpline.txt';
     end
+
     [regParDir , ~] = fileparts(which(fileName));
     regParFile = strcat(regParDir,filesep,fileName);
 
@@ -51,7 +61,7 @@ try
             image1 = squeeze(imagesIn(echo,:,:,slice));
 
             % Register
-            image2 = elastix(image1,image0,[],regParFile);
+            image2 = elastix(image1,image0,outputDir,regParFile);
 
             % New registered image
             imagesIn(echo,:,:,slice) = image2;
