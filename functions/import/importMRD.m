@@ -1,14 +1,14 @@
 function validFile = importMRD(app)
 
-validFile = true;
+validFile = false;
 
 if contains(app.mrdFile,"retro") || contains(app.mrdFile,"p2roud")
 
     % Data reconstructed by P2ROUD or RETROSPECTIVE app
-    app.dataFile = [app.mrdImportPath,mrdfile];
-    flist.name = app.mrdFile;
-    flist.folder = app.mrdImportPath;
+    app.dataFile = [app.mrdImportPath,app.mrdFile];
     app.p2roudFlag = true;
+    flist(1).name = app.mrdFile;
+    flist(1).folder = app.mrdImportPath;
 
 else
 
@@ -48,7 +48,7 @@ if ~isempty(flist)
         app.parameters.scanner = "MRSolutions";
     end
 
-    if isfield(app.parameters,'NO_VIEWS_2')
+    if isfield(app.parameters,'NO_VIEWS_2') && isfield(app.parameters,'EXPERIMENT_ARRAY')
 
         if app.parameters.NO_VIEWS_2 > 1
 
@@ -114,6 +114,7 @@ if ~isempty(flist)
         if isfield(app.parameters,'NO_ECHOES')
 
             if app.parameters.NO_ECHOES > 1
+
                 app.TextMessage('Multiple echoes detected ...');
                 app.DatafileEditField.Value = app.mrdFile;
 
@@ -134,11 +135,12 @@ if ~isempty(flist)
                     app.dataType = "spin-echo";
                 end
 
+                validFile = true;
+
             end
 
         else
 
-            validFile = false;
             app.dataType = "not-valid";
         
         end
@@ -147,8 +149,19 @@ if ~isempty(flist)
 
     % Get some parameters from the RPR file
     try
-        rprFile = strrep(fullfile(flist(i).folder,flist(i).name),'.MRD','.rpr');
-        app.rprPars = readRPRfile(rprFile);
+        rprFile = strrep(app.dataFile,'.MRD','.rpr');
+        app.rprPars = readRPRfile(app, rprFile);        
+    catch
+    end
+
+    try
+        if isfield(app.rprPars,"ImagingFrequency")
+            app.parameters.imagingFrequency = app.rprPars.ImagingFrequency;
+        else
+            app.parameters.imagingFrequency = 298.05;
+            app.TextMessage('WARNING: Field strength unknown, assuming 7T ...');
+        end
+        app.TextMessage(strcat("Resonance frequency = ",num2str(app.parameters.imagingFrequency)," MHz ..."));
     catch
     end
 

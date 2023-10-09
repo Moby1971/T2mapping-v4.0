@@ -5,6 +5,7 @@ function registerImages(app)
 % Registration of multi-echo images
 
 imagesIn = app.images;
+complexImagesIn = app.complexImages;
 
 [nEchoes,~,~,nrSlices] = size(imagesIn);
 
@@ -18,7 +19,9 @@ try
     app.TextMessage(strcat("Scratch folder = ",outputDir));
 
     [~,elastix_version] = system('elastix --version');
+    [~,transformix_version] = system('transformix --version');
     app.TextMessage(elastix_version);
+    app.TextMessage(transformix_version);
 
     switch app.RegistrationDropDown.Value
         
@@ -59,12 +62,21 @@ try
             % Fixed and moving image
             image0 = squeeze(imagesIn(1,:,:,slice));
             image1 = squeeze(imagesIn(echo,:,:,slice));
+            
+            imageReal = real(squeeze(complexImagesIn(echo,:,:,slice)));
+            imageImag = imag(squeeze(complexImagesIn(echo,:,:,slice)));
 
             % Register
-            image2 = elastix(image1,image0,outputDir,regParFile);
+            [imageReg,pars] = elastix(app,image1,image0,outputDir,regParFile); 
+            
+            % Apply also to complex image, real and imaginary part separately
+            realImageReg = transformix(imageReal,pars);
+            imagImageReg = transformix(imageImag,pars);
+            complexImageReg = double(realImageReg) + 1i*double(imagImageReg);
 
-            % New registered image
-            imagesIn(echo,:,:,slice) = image2;
+            % New registered images
+            imagesIn(echo,:,:,slice) = imageReg;
+            complexImagesIn(echo,:,:,slice) = complexImageReg;
 
             % Update the registration progress gauge
             app.RegProgressGauge.Value = round(100*(cnt/totalNumberOfSteps));
@@ -129,16 +141,30 @@ catch ME
             image0 = squeeze(imagesIn(1,:,:,slice));
             image1 = squeeze(imagesIn(echo,:,:,slice));
 
+            imageReal = real(squeeze(complexImagesIn(echo,:,:,slice)));
+            imageImag = imag(squeeze(complexImagesIn(echo,:,:,slice)));
+
             % Threshold
-            threshold = graythresh(mat2gray(image0)) * max(image0(:));
+            threshold = 0.7 * graythresh(mat2gray(image0)) * max(image0(:));
             image0(image0 < threshold) = 0;
             image1(image0 < threshold) = 0;
 
-            % Register
-            image2 = imregister(image1,image0,method,optimizer, metric,'DisplayOptimization',0);
+            % Determine transformation matrix
+            pars = imregtform(image1,image0,method,optimizer, metric,'DisplayOptimization',0);
+
+            sameAsInput = affineOutputView(size(image0),pars,"BoundsStyle","SameAsInput");
+            
+            % Apply the transformation
+            imageReg = imwarp(image1,pars,"OutputView",sameAsInput);
+
+            % Apply also to complex image, real and imaginary part separately
+            realImageReg = imwarp(imageReal,pars,"OutputView",sameAsInput);
+            imagImageReg = imwarp(imageImag,pars,"OutputView",sameAsInput);
+            complexImageReg = double(realImageReg) + 1i*double(imagImageReg);
 
             % New registered image
-            imagesIn(echo,:,:,slice) = image2;
+            imagesIn(echo,:,:,slice) = imageReg;
+            complexImagesIn(echo,:,:,slice) = complexImageReg;
 
             % Update the registration progress gauge
             app.RegProgressGauge.Value = round(100*(cnt/totalNumberOfSteps));
@@ -166,5 +192,6 @@ app.TextMessage('Finished ... ');
 imagesIn = 32767*imagesIn/max(imagesIn(:));
 
 app.images = imagesIn;
+app.complexImages = complexImagesIn;
 
 end

@@ -14,6 +14,7 @@ parameters.scanner = 'b-type';
 parameters.filename = '111';
 
 
+
 % Check if MGE pulse program
 if contains(info1.PULPROG,"MGE")
     parameters.PPL = 'flash';
@@ -92,6 +93,7 @@ parameters.date = datetime;
 parameters.nucleus = '1H';
 parameters.filename = 'Proton';
 parameters.field_strength = str2num(info1.BF1)/42.58; %#ok<*ST2NM>
+parameters.imagingFrequency = str2num(info1.BF1);
 parameters.filename = 111;
 parameters.pe1_order = 2;
 parameters.radial_on = 0;
@@ -266,7 +268,7 @@ end
                             eval(['struct.' lower(paramName(1:findstr(paramName,'_')-1)) '.' lower(paramName(findstr(paramName,'_')+1:length(paramName))) '= paramValue;']);
                         catch
                             eval(['struct.' lower(paramName(1:findstr(paramName,'_')-1)) '.' datestr(str2num(paramName(findstr(paramName,'_')+1:findstr(paramName,'_')+2)),9) ...
-                                paramName(findstr(paramName,'_')+2:length(paramName)) '= paramValue;']); %#ok<*FSTR>
+                                paramName(findstr(paramName,'_')+2:length(paramName)) '= paramValue;']); %#ok<DATST,*FSTR>
                         end
                     end
 

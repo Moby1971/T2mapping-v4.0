@@ -1,4 +1,4 @@
-function varargout=transformix(movingImage,parameters,verbose)
+function varargout=transformix(movingImage,parameters,~)
 % transformix image registration and warping wrapper
 %
 % function [registeredImage,log] = transformix(movingImage,parameters) 
@@ -88,20 +88,20 @@ function varargout=transformix(movingImage,parameters,verbose)
 % - elastix and transformix binaries in path
 % - image processing toolbox (to run examples)
 
-
+verbose = 0;
 
 %Confirm that the transformix binary is present
 [~,transformix_version] = system('transformix --version');
 
 r=regexp(transformix_version,'error', 'once');
 if ~isempty(r)
-    fprintf('\n*** ERROR starting transformix binary:\n%s\n',transformix_version)
+    %fprintf('\n*** ERROR starting transformix binary:\n%s\n',transformix_version)
     return
 end
 
 r=regexp(transformix_version,'version', 'once');
 if isempty(r)
-    fprintf('\n*** ERROR: Unable to find transformix binary in system path. Quitting ***\n')
+    %fprintf('\n*** ERROR: Unable to find transformix binary in system path. Quitting ***\n')
     return
 end
 
