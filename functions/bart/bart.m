@@ -16,7 +16,11 @@ if ispc
     % a bug in Matlab).
 
     setenv('LD_LIBRARY_PATH', '');
-    name = strrep(tempname,' ','_');   % Windows user names with spaces give problems, replace with underscore
+
+    name = 'C:\tmp\';
+    if ~exist(name, 'dir')
+        mkdir(name);
+    end
 
     in = cell(1, nargin-2);
 
@@ -90,7 +94,7 @@ end
 
 %%%%% OSX / LINUX %%%%%%
 
-if ismac
+if ismac || isunix
 
     if nargin==1 || all(cmd==0)
         app.TextMessage('Usage: bart <command> <arguments...>');
@@ -119,7 +123,7 @@ if ismac
     end
 
     name = tempname;
-
+ 
     in = cell(1, nargin - 2);
 
     for i = 1:nargin-2

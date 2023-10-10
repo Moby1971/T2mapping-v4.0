@@ -15,8 +15,14 @@ app.TextMessage('Image registration ...');
 try
 
     % Temp directory for storing registration files
-    outputDir = tempdir;
-    app.TextMessage(strcat("Scratch folder = ",outputDir));
+    if ispc
+        outputDir = 'C:\tmp\';
+        if ~exist(outputDir, 'dir')
+            mkdir(outputDir);
+        end
+    else
+        outputDir = [];
+    end
 
     [~,elastix_version] = system('elastix --version');
     [~,transformix_version] = system('transformix --version');
