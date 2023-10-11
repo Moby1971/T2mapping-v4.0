@@ -16,10 +16,16 @@ if ispc
     % a bug in Matlab).
 
     setenv('LD_LIBRARY_PATH', '');
-
-    name = 'C:\tmp\';
-    if ~exist(name, 'dir')
-        mkdir(name);
+     
+    % Decided to use c:\temp as temp directory. Hopefully this prevents issues
+    try
+        name = strcat(tempname('C:\tmp'),filesep);
+        if ~exist(name, 'dir')
+            mkdir(name);
+        end
+    catch
+        % Second chance if C:\tmp cannot be created
+        name = strrep(tempname,' ','_');   % Windows user names with spaces give problems, replace with underscore
     end
 
     in = cell(1, nargin-2);
@@ -68,6 +74,7 @@ if ispc
     end
 
     for i=1:nargout
+
         if ERR==0
             if contains(cmd,"estdelay") || contains(cmd,"-Rh") || contains(cmd,"version") 
                 varargout{1} = cmdout;
@@ -75,16 +82,25 @@ if ispc
                 varargout{i} = readcfl(out{i});
             end
         end
+
         if (exist(strcat(out{i}, '.cfl'),'file'))
             delete(strcat(out{i}, '.cfl'));
         end
         if (exist(strcat(out{i}, '.hdr'),'file'))
             delete(strcat(out{i}, '.hdr'));
         end
+
     end
 
     if ERR~=0
         app.bartVersion = 'none';
+    end
+
+    % Delete the temporary folder
+    try
+        delete(strcat(name,filesep,'*'));
+        rmdir(name);
+    catch
     end
 
 end
@@ -94,7 +110,7 @@ end
 
 %%%%% OSX / LINUX %%%%%%
 
-if ismac || isunix
+if ismac
 
     if nargin==1 || all(cmd==0)
         app.TextMessage('Usage: bart <command> <arguments...>');
@@ -123,7 +139,7 @@ if ismac || isunix
     end
 
     name = tempname;
- 
+
     in = cell(1, nargin - 2);
 
     for i = 1:nargin-2
