@@ -92,8 +92,10 @@ if dimd > 1
                     T2image = rot90(T2image,-1);
                     M0image = rot90(M0image,-1);
                     R2image = rot90(R2image,-1);
-                    Wimage = rot90(Wimage,-1);
-                    Fimage = rot90(Fimage,-1);
+                    if app.validWaterFatFlag
+                        Wimage = rot90(Wimage,-1);
+                        Fimage = rot90(Fimage,-1);
+                    end
                 end
             end
 
@@ -139,7 +141,7 @@ else
         M0image(M0image<0) = 0;
         M0image(M0image>255) = 255;
         M0image = uint8(imresize(M0image,[numrows numcols]));
-       
+
         % R2
         r2scale = 100;
         R2image = uint8(round((255/r2scale)*imresize(squeeze(100*r2map(:,:,slice,1)),[numrows numcols])));
@@ -156,8 +158,10 @@ else
                 T2image = rot90(T2image,-1);
                 M0image = rot90(M0image,-1);
                 R2image = rot90(R2image,-1);
-                Wimage = rot90(Wimage,-1);
-                Fimage = rot90(Fimage,-1);
+                if app.validWaterFatFlag
+                    Wimage = rot90(Wimage,-1);
+                    Fimage = rot90(Fimage,-1);
+                end
             end
         end
 

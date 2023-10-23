@@ -5,6 +5,7 @@ function [rawData, rawImages, parameters] = importB(importPath) %#ok<*INUSL>
 
 
 % Parameters
+
 info1 = jCampRead(strcat(importPath,'acqp'));
 info2 = jCampRead(strcat(importPath,'method'));
 

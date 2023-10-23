@@ -9,7 +9,8 @@ tes = app.tes';
 tes(delements) = [];
 image(delements,:,:,:,:) = [];
 
-imDataParams.images = permute(image,[2 3 5 4 1]); % acquired k-space data, array of size[nx,ny,1,ncoils,nTE]
+imDataParams.images = permute(image,[2 3 5 4 1]);   % acquired k-space data, array of size[nx,ny,1,ncoils,nTE]
+imDataParams.images = imDataParams.images.*mask;    % mask the images    
 
 gamma = 42.56;
 imDataParams.TE = tes;  % (in seconds)
