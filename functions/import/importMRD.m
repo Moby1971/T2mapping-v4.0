@@ -116,7 +116,7 @@ if ~isempty(flist)
             if app.parameters.NO_ECHOES > 1
 
                 app.TextMessage('Multiple echoes detected ...');
-                app.DataFileEditField.Value = app.mrdFile;
+                app.DataFileViewField.Value = app.mrdFile;
 
                 % For multi-gradient-echo type sequence
                 if contains(app.parameters.PPL,'flash')

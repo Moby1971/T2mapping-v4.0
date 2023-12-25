@@ -7,7 +7,7 @@ function exportGifT2(app, gifexportpath)
 % Gustav Strijkers
 % Amsterdam UMC
 % g.j.strijkers@amsterdamumc.nl
-% Oct 2023
+% Dec 2023
 %
 %------------------------------------------------------------
 
@@ -26,7 +26,7 @@ wcmap = app.watercmap;
 fcmap = app.fatcmap;
 aspect = app.AspectRatioViewField.Value;
 parameters = app.parameters;
-rsquare = app.Rsquare.Value;
+rsquare = app.RsquareEditField.Value;
 
 % Dimensions
 [dimx,dimy,dimz,dimd] = size(t2map);

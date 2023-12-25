@@ -7,7 +7,7 @@ function [images, complexImages] = fftReco(app)
 % Gustav Strijkers
 % Amsterdam UMC
 % g.j.strijkers@amsterdamumc.nl
-% Oct 2023
+% Dec 2023
 %
 %------------------------------------------------------------
 
@@ -24,7 +24,6 @@ if app.data3dFlag
     tukeyfilter = circtukey3D(app.dimx,app.dimy,app.ns,lev,row,col,0.1);
 
     complexImages = zeros(app.ne,app.dimx,app.dimy,app.ns,app.nd,app.nrCoils);
-    kSpace = zeros(app.ne,app.dimx,app.dimy,app.ns,app.nd,app.nrCoils);
     for dynamic = 1:app.nd
         for echo = 1:app.ne
             for coil = 1:app.nrCoils
@@ -45,7 +44,6 @@ else
     tukeyfilter = circtukey2D(app.dimx,app.dimy,row,col,0.1);
 
     complexImages = zeros(app.ne,app.dimx,app.dimy,app.nd,app.nrCoils);
-    kSpace = zeros(app.ne,app.dimx,app.dimy,app.nd,app.nrCoils);
     for dynamic = 1:app.nd
         for echo = 1:app.ne
             for slice = 1:app.ns
