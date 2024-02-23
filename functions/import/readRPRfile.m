@@ -1,13 +1,29 @@
-function rprPars = readRPRfile(app,filename)
+function rprPars = readRPRfile(app,rprFolder, rprName)
 
 % Read the RPR file
+
 try
-    fid = fopen(filename,'r');
-    rprData = char(fread(fid,Inf,'uchar')');
-    fclose(fid);
+
+    rprFilename{1} = strcat(rprFolder,filesep,rprName,'.rpr');
+    rprFilename{2} = strcat(rprFolder,filesep,'Recon_001',filesep,rprName,'.rpr');
+
+    for cnt = 1:length(rprFilename)
+
+        if isfile(rprFilename{cnt})
+            app.TextMessage(strcat("RPR file = ",rprFilename{cnt}));
+            fid = fopen(rprFilename{cnt},'r');
+            rprData = char(fread(fid,Inf,'uchar')');
+            fclose(fid);
+            break;
+        end
+
+    end
+
 catch ME
     app.TextMessage(ME.message);
 end
+
+
 
 % Extract some parameters
 

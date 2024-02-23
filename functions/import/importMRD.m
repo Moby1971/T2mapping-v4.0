@@ -149,8 +149,8 @@ if ~isempty(flist)
 
     % Get some parameters from the RPR file
     try
-        rprFile = strrep(app.dataFile,'.MRD','.rpr');
-        app.rprPars = readRPRfile(app, rprFile);        
+        [rprDir,rprName,~] = fileparts(app.dataFile);
+        app.rprPars = readRPRfile(app, rprDir, rprName);        
     catch
     end
 
