@@ -1,4 +1,4 @@
-function exportGifT2(app, gifexportpath)
+function exportGifT2(app, gifExportBase)
 
 %------------------------------------------------------------
 % Exports T2 maps and M0 maps and R^2 maps to animated gif
@@ -47,9 +47,24 @@ else
     delay_time = 2/dimz;
 end
 
-if ~exist(gifexportpath, 'dir')
-    mkdir(gifexportpath);
+
+% Create new directory
+ready = false;
+cnt = 1;
+while ~ready
+    gifexportpath = strcat(gifExportBase,app.tag,'T2',filesep,num2str(cnt),filesep);
+    if ~exist(gifexportpath, 'dir')
+        mkdir(gifexportpath);
+        ready = true;
+    end
+    cnt = cnt + 1;
 end
+
+app.TabGroup2.SelectedTab = app.RawImagesTab;
+app.TabGroup3.SelectedTab = app.M0R2Tab;
+exportapp(app.T2mappUIFigure,strcat(gifexportpath,filesep,"M0map",app.tag,".png"));
+app.TabGroup3.SelectedTab = app.T2mapTab;
+exportapp(app.T2mappUIFigure,strcat(gifexportpath,filesep,"T2map",app.tag,".png"));
 
 
 % ----------------------------------

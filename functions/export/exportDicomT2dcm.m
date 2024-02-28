@@ -8,20 +8,18 @@ function exportDicomT2dcm(app, dcmFilesPath)
 % Gustav Strijkers
 % Amsterdam UMC
 % g.j.strijkers@amsterdamumc.nl
-% Sept 2023
+% Feb 2024
 %
 %------------------------------------------------------------
 
 
 % Input
-directory = app.dicomExportPath;
 m0map = app.m0map;
 t2map = app.t2map;
 r2map = app.r2map;
 wmap = app.watermap;
 fmap = app.fatmap;
 parameters = app.parameters;
-
 
 % Mulitply T2, water and fat map values with this factor to prevent discretization
 scaling = 100; 
@@ -49,7 +47,7 @@ for dynamic = 1:dimd
 
     for slice = 1:dimz
 
-        % Read the Dicom header
+        % Read the dicom header
         dcmHeader{slice,dynamic} = dicominfo(strcat(dcmFilesPath,filesep,files{ (dynamic-1)*dimz*dimr + (slice-1)*dimr + 1 })); %#ok<*AGROW>
 
         % Changes some tags
@@ -64,29 +62,38 @@ for dynamic = 1:dimd
 
 end
 
-% create folders if not exist, and delete folders content
-dir1 = '';
-dir2 = 'DICOM';
-dir3 = strcat(num2str(dcmHeader{1,1}.SeriesNumber),'T2mapping');
+% Create new directory
+directory = strcat(app.dicomExportPath,filesep,'DICOM',filesep);
+ready = false;
+cnt = 1;
+while ~ready
+    folderName = strcat(directory,app.tag,'T2',filesep,num2str(cnt),filesep);
+    if ~exist(folderName, 'dir')
+        mkdir(folderName);
+        ready = true;
+    end
+    cnt = cnt + 1;
+end
+
 dir41 = 'T2';
 dir42 = 'M0';
 dir43 = 'R2';
 dir44 = 'Water';
 dir45 = 'Fat';
 
-output_directory1 = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir41);
+output_directory1 = strcat(folderName,dir41);
 if ~exist(output_directory1, 'dir') 
     mkdir(output_directory1); 
 end
 delete(strcat(output_directory1,filesep,'*'));
 
-output_directory2 = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir42);
+output_directory2 = strcat(folderName,dir42);
 if ~exist(output_directory2, 'dir')
     mkdir(output_directory2); 
 end
 delete(strcat(output_directory2,filesep,'*'));
 
-output_directory3 = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir43);
+output_directory3 = strcat(folderName,dir43);
 if ~exist(output_directory3, 'dir')
     mkdir(output_directory3); 
 end
@@ -94,13 +101,13 @@ delete(strcat(output_directory3,filesep,'*'));
 
 if app.validWaterFatFlag
 
-    output_directory4 = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir44);
+    output_directory4 = strcat(folderName,dir44);
     if ~exist(output_directory4, 'dir')
         mkdir(output_directory4);
     end
     delete(strcat(output_directory4,filesep,'*'));
 
-    output_directory5 = strcat(directory,filesep,dir1,filesep,dir2,filesep,dir3,filesep,dir45);
+    output_directory5 = strcat(folderName,dir45);
     if ~exist(output_directory5, 'dir')
         mkdir(output_directory5);
     end
@@ -110,13 +117,14 @@ end
 
 
 % Export the T2 map DICOMS
+seriesInstanceID = dicomuid;
 for dynamic = 1:dimd
 
     for slice = 1:dimz
 
         dcmHeader{slice,dynamic}.ProtocolName = 'T2-map';
         dcmHeader{slice,dynamic}.SequenceName = 'T2-map';
-        dcmHeader{slice,dynamic}.EchoTime = 1.1;
+        dcmHeader{slice,dynamic}.SeriesInstanceUID = seriesInstanceID;
         dcmHeader{slice,dynamic}.ImageType = 'DERIVED\RELAXATION\T2';
 
         fn = ['0000',num2str(slice)];
@@ -139,14 +147,14 @@ end
 
 % Export the M0 map Dicoms
 m0map = round(32767*m0map/max(m0map(:)));
-
+seriesInstanceID = dicomuid;
 for dynamic = 1:dimd
 
     for slice=1:dimz
 
         dcmHeader{slice,dynamic}.ProtocolName = 'M0-map';
         dcmHeader{slice,dynamic}.SequenceName = 'M0-map';
-        dcmHeader{slice,dynamic}.EchoTime = 1.2;
+        dcmHeader{slice,dynamic}.SeriesInstanceUID = seriesInstanceID;
         dcmHeader{slice,dynamic}.ImageType = 'DERIVED\RELAXATION\M0';
 
         fn = ['0000',num2str(slice)];
@@ -166,13 +174,14 @@ end
 
 
 % Export the  R^2 map Dicoms
+seriesInstanceID = dicomuid;
 for dynamic = 1:dimd
 
     for slice=1:dimz
 
         dcmHeader{slice,dynamic}.ProtocolName = 'R2-map';
         dcmHeader{slice,dynamic}.SequenceName = 'R2-map';
-        dcmHeader{slice,dynamic}.EchoTime = 1.3;
+        dcmHeader{slice,dynamic}.SeriesInstanceUID = seriesInstanceID;
         dcmHeader{slice,dynamic}.ImageType = 'DERIVED\RELAXATION\R2';
 
         fn = ['0000',num2str(slice)];
@@ -194,13 +203,14 @@ end
 % Water / fat images
 if app.validWaterFatFlag
 
+    seriesInstanceID = dicomuid;
     for dynamic = 1:dimd
 
         for slice=1:dimz
 
             dcmHeader{slice,dynamic}.ProtocolName = 'Water-map';
             dcmHeader{slice,dynamic}.SequenceName = 'Water-map';
-            dcmHeader{slice,dynamic}.EchoTime = 1.4;
+            dcmHeader{slice,dynamic}.SeriesInstanceUID = seriesInstanceID;
             dcmHeader{slice,dynamic}.ImageType = 'DERIVED\RELAXATION\R2';
 
             fn = ['0000',num2str(slice)];
@@ -217,13 +227,14 @@ if app.validWaterFatFlag
 
     end
 
+    seriesInstanceID = dicomuid;
     for dynamic = 1:dimd
 
         for slice=1:dimz
 
             dcmHeader{slice,dynamic}.ProtocolName = 'Fat-map';
             dcmHeader{slice,dynamic}.SequenceName = 'Fat-map';
-            dcmHeader{slice,dynamic}.EchoTime = 1.5;
+            dcmHeader{slice,dynamic}.SeriesInstanceUID = seriesInstanceID;
             dcmHeader{slice,dynamic}.ImageType = 'DERIVED\RELAXATION\R2';
 
             fn = ['0000',num2str(slice)];
