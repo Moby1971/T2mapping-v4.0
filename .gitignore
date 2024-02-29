@@ -40,3 +40,7 @@ functions/reconstruction/fftReco.m
 functions/reconstruction/ifft2reco.m
 functions/reconstruction/ifft3reco.m
 functions/registration/registerImages.m
+functions/import/Get_mrd_3D4.m
+functions/import/importB.m
+functions/import/importMRD.m
+functions/import/readRPRfile.m
