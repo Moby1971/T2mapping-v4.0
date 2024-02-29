@@ -8,3 +8,5 @@ T2mapp_resources/
 functions/reconstruction/mtop.m
 functions/PCAdenoise/PCAdenoise.m
 functions/export/exportDicomT2.m
+functions/export/exportDicomT2.m
+functions/export/exportDicomT2dcm.m
