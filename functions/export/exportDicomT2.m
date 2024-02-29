@@ -20,18 +20,65 @@ r2map = app.r2map;
 wmap = app.watermap;
 fmap = app.fatmap;
 parameters = app.parameters;
-tag = app.tag;
 
 
 % Mulitply T2, water, and fat values with this factor to prevent discretization
 scaling = 100;
 
 
-% Create folder if not exist, and clear
-folder_name = strcat(directory,filesep,'T2map-DICOM-',tag);
-if ~exist(folder_name, 'dir')
-    mkdir(folder_name); end
-delete(strcat(folder_name,filesep,'*'));
+% Create new directory
+ready = false;
+cnt = 1;
+while ~ready
+    folderName = strcat(directory,app.tag,'T2',filesep,num2str(cnt),filesep);
+    if ~exist(folderName, 'dir')
+        mkdir(folderName);
+        ready = true;
+    end
+    cnt = cnt + 1;
+end
+
+dir41 = 'T2';
+dir42 = 'M0';
+dir43 = 'R2';
+dir44 = 'Water';
+dir45 = 'Fat';
+
+output_directory1 = strcat(folderName,dir41);
+if ~exist(output_directory1, 'dir') 
+    mkdir(output_directory1); 
+end
+delete(strcat(output_directory1,filesep,'*'));
+
+output_directory2 = strcat(folderName,dir42);
+if ~exist(output_directory2, 'dir')
+    mkdir(output_directory2); 
+end
+delete(strcat(output_directory2,filesep,'*'));
+
+output_directory3 = strcat(folderName,dir43);
+if ~exist(output_directory3, 'dir')
+    mkdir(output_directory3); 
+end
+delete(strcat(output_directory3,filesep,'*'));
+
+if app.validWaterFatFlag
+
+    output_directory4 = strcat(folderName,dir44);
+    if ~exist(output_directory4, 'dir')
+        mkdir(output_directory4);
+    end
+    delete(strcat(output_directory4,filesep,'*'));
+
+    output_directory5 = strcat(folderName,dir45);
+    if ~exist(output_directory5, 'dir')
+        mkdir(output_directory5);
+    end
+    delete(strcat(output_directory5,filesep,'*'));
+
+end
+
+
 
 
 % Phase orientation correction
@@ -67,7 +114,7 @@ for dynamic = 1:dimd
         dn = strcat('0000',num2str(dynamic));
         dn = dn(size(dn,2)-4:size(dn,2));
 
-        fname = strcat(folder_name,filesep,'T2map-slice',fn,'-dynamic',dn,'.dcm');
+        fname = strcat(output_directory1,filesep,'T2map-slice',fn,'-dynamic',dn,'.dcm');
         image = rot90(squeeze(cast(round(scaling*t2map(:,:,slice,dynamic)),'uint16')));
         dicomwrite(image, fname, dcmHeader);
 
@@ -92,7 +139,7 @@ for dynamic = 1:dimd
         dn = strcat('0000',num2str(dynamic));
         dn = dn(size(dn,2)-4:size(dn,2));
 
-        fname = strcat(folder_name,filesep,'M0map-slice',fn,'-dynamic',dn,'.dcm');
+        fname = strcat(output_directory2,filesep,'M0map-slice',fn,'-dynamic',dn,'.dcm');
         image = rot90(squeeze(cast(round(m0map(:,:,slice,dynamic)),'uint16')));
         dicomwrite(image, fname, dcmHeader);
 
@@ -116,7 +163,7 @@ for dynamic = 1:dimd
         dn = strcat('0000',num2str(dynamic));
         dn = dn(size(dn,2)-4:size(dn,2));
 
-        fname = strcat(folder_name,filesep,'R2map-slice',fn,'-dynamic',dn,'.dcm');
+        fname = strcat(output_directory3,filesep,'R2map-slice',fn,'-dynamic',dn,'.dcm');
         image = rot90(squeeze(cast(round(scaling*r2map(:,:,slice,dynamic)),'uint16')));
         dicomwrite(image, fname, dcmHeader);
 
@@ -142,7 +189,7 @@ if app.validWaterFatFlag
             dn = strcat('0000',num2str(dynamic));
             dn = dn(size(dn,2)-4:size(dn,2));
 
-            fname = strcat(folder_name,filesep,'Watermap-slice',fn,'-dynamic',dn,'.dcm');
+            fname = strcat(output_directory4,filesep,'Watermap-slice',fn,'-dynamic',dn,'.dcm');
             image = rot90(squeeze(cast(round(scaling*wmap(:,:,slice,dynamic)),'uint16')));
             dicomwrite(image, fname, dcmHeader);
 
@@ -165,7 +212,7 @@ if app.validWaterFatFlag
             dn = strcat('0000',num2str(dynamic));
             dn = dn(size(dn,2)-4:size(dn,2));
 
-            fname = strcat(folder_name,filesep,'Fatmap-slice',fn,'-dynamic',dn,'.dcm');
+            fname = strcat(output_directory5,filesep,'Fatmap-slice',fn,'-dynamic',dn,'.dcm');
             image = rot90(squeeze(cast(round(scaling*fmap(:,:,slice,dynamic)),'uint16')));
             dicomwrite(image, fname, dcmHeader);
 
@@ -249,7 +296,7 @@ end
         dcmhead.ReferringPhysicianName.NamePrefix = '';
         dcmhead.ReferringPhysicianName.NameSuffix = '';
         dcmhead.StationName = 'MRI Scanner';
-        dcmhead.StudyDescription = 'Parameter Mapping';
+        dcmhead.StudyDescription = 'Relaxation time mapping';
         dcmhead.SeriesDescription = '';
         dcmhead.InstitutionalDepartmentName = 'Amsterdam UMC preclinical MRI';
         dcmhead.PhysicianOfRecord.FamilyName = 'Amsterdam UMC preclinical MRI';
@@ -276,7 +323,7 @@ end
         dcmhead.DerivationDescription = '';
         dcmhead.FrameType = '';
         dcmhead.PatientName.FamilyName = 'Amsterdam UMC preclinical MRI';
-        dcmhead.PatientID = '01';
+        dcmhead.PatientID = app.tag;
         dcmhead.PatientBirthDate = date;
         dcmhead.PatientBirthTime = '';
         dcmhead.PatientSex = 'F';
