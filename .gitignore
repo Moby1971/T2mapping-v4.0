@@ -30,3 +30,13 @@ functions/fitting/dotheT2fit2Dtemp.m
 functions/fitting/dotheT2fitSingle.m
 functions/fitting/mtop.m
 functions/export/exportGifT2.m
+functions/PCAdenoise/PCAdenoise.m
+functions/reconstruction/circtukey2D.m
+functions/reconstruction/circtukey3D.m
+functions/reconstruction/CSreco.m
+functions/reconstruction/fft2reco.m
+functions/reconstruction/fft3reco.m
+functions/reconstruction/fftReco.m
+functions/reconstruction/ifft2reco.m
+functions/reconstruction/ifft3reco.m
+functions/registration/registerImages.m
