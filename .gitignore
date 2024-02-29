@@ -29,3 +29,4 @@ functions/fitting/dotheT2fit2D.m
 functions/fitting/dotheT2fit2Dtemp.m
 functions/fitting/dotheT2fitSingle.m
 functions/fitting/mtop.m
+functions/export/exportGifT2.m
