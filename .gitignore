@@ -5,8 +5,6 @@
 T2mapp.prj
 T2mapp/
 T2mapp_resources/
-functions/reconstruction/mtop.m
-functions/PCAdenoise/PCAdenoise.m
 functions/export/exportDicomT2.m
 functions/export/exportDicomT2.m
 functions/export/exportDicomT2dcm.m
@@ -20,16 +18,6 @@ functions/fitting/dotheT2fit2D.m
 functions/fitting/dotheT2fit2Dtemp.m
 functions/fitting/dotheT2fitSingle.m
 functions/fitting/mtop.m
-functions/fitting/dothemobaT2fit2D.m
-functions/fitting/dothemobaT2fit3D.m
-functions/fitting/dothemobaT2starfit2D.m
-functions/fitting/dothemobaT2starfit3D.m
-functions/fitting/dothemobaT2starfit8.m
-functions/fitting/dotheT2fit2D.m
-functions/fitting/dotheT2fit2Dtemp.m
-functions/fitting/dotheT2fitSingle.m
-functions/fitting/mtop.m
-functions/export/exportGifT2.m
 functions/PCAdenoise/PCAdenoise.m
 functions/reconstruction/circtukey2D.m
 functions/reconstruction/circtukey3D.m
@@ -39,6 +27,7 @@ functions/reconstruction/fft3reco.m
 functions/reconstruction/fftReco.m
 functions/reconstruction/ifft2reco.m
 functions/reconstruction/ifft3reco.m
+functions/reconstruction/mtop.m
 functions/registration/registerImages.m
 functions/import/Get_mrd_3D4.m
 functions/import/importB.m
