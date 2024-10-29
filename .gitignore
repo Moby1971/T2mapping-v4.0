@@ -34,3 +34,10 @@ functions/import/importB.m
 functions/import/importMRD.m
 functions/import/readRPRfile.m
 manual/T2mapp - manual.pages
+functions/export/exportNiftiFcn.m
+functions/export/niftii/dicm2nii.m
+functions/export/niftii/dicm_dict.m
+functions/export/niftii/dicm_hdr.m
+functions/export/niftii/dicm_img.m
+functions/export/niftii/dicm_save.m
+functions/export/niftii/nii_tool.m
