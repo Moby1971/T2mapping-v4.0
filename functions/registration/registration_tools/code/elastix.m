@@ -1,4 +1,4 @@
-function varargout=elastix(~,movingImage,fixedImage,outputDir,paramFile,varargin)
+function varargout=elastix(movingImage,fixedImage,outputDir,paramFile,varargin)
 % elastix image registration and warping wrapper
 %
 % function varargout=elastix(movingImage,fixedImage,outputDir,paramFile)
@@ -244,11 +244,7 @@ elseif ischar(paramFile) && endsWith(paramFile,'.yml') && isempty(paramstruct) %
     elastix_parameter_write(paramFname{1},paramFile)
 
 elseif (ischar(paramFile) && endsWith(paramFile,'.txt')) %we have an elastix parameter file
-    if ~strcmp(outputDir,'.')     
-        
-        %app.TextMessage(paramFile);
-        %app.TextMessage(outputDir);
-
+    if ~strcmp(outputDir,'.')
         copyfile(paramFile,outputDir)
         % Build the correct parameter file name with path pointing to output dir
         [~,f,e] = fileparts(paramFile);
@@ -319,9 +315,9 @@ for ii=1:length(paramFname)
 end
 
 %store a copy of the command to the directory
-%cmdFid = fopen(fullfile(outputDir,'CMD'),'w');
+cmdFid = fopen(fullfile(outputDir,'CMD'),'w');
 %fprintf(cmdFid,'%s\n',CMD);
-%fclose(cmdFid);
+fclose(cmdFid);
 
 
 
@@ -330,14 +326,14 @@ end
 % Run the command and report back if it failed
 %fprintf('Running: %s\n',CMD)
 
-[status,~] = system(CMD);
+[status,result]=system(CMD);
 
 if status %Things failed. Oh dear.
     if status
         %fprintf('\n\t*** Transform Failed! ***\n%s\n',result)
         %fprintf('\tYou may want to check out the Elastix FAQ: https://github.com/SuperElastix/elastix/wiki/FAQ\n')
     else
-        % disp(result)
+        disp(result)
     end
     registered=[];
     out.outputDir=outputDir;
