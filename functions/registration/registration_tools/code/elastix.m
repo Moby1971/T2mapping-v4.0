@@ -90,13 +90,16 @@ function varargout=elastix(movingImage,fixedImage,outputDir,paramFile,varargin)
 % - elastix and transformix binaries in path
 % - image processing toolbox (to run examples)
 
-
 %----------------------------------------------------------------------
 % *** Handle default options ***
 
 
 %Confirm that the elastix binary is present and can run
-[~,elastix_version] = system('elastix --version');
+if ispc
+    [~,elastix_version] = system('elastix.exe --version');
+else
+    [~,elastix_version] = system('elastix --version');
+end
 
 r=regexp(elastix_version,'error', 'once');
 if ~isempty(r)
@@ -244,14 +247,14 @@ elseif ischar(paramFile) && endsWith(paramFile,'.yml') && isempty(paramstruct) %
     elastix_parameter_write(paramFname{1},paramFile)
 
 elseif (ischar(paramFile) && endsWith(paramFile,'.txt')) %we have an elastix parameter file
-    if ~strcmp(outputDir,'.')
-        copyfile(paramFile,outputDir)
-        % Build the correct parameter file name with path pointing to output dir
-        [~,f,e] = fileparts(paramFile);
-        paramFname{1} = fullfile(outputDir,[f,e]);
-    else
-        paramFname{1} = paramFile;
-    end
+    % if ~strcmp(outputDir,'.')
+    copyfile(which(paramFile),outputDir)
+    % Build the correct parameter file name with path pointing to output dir
+    [~,f,e] = fileparts(which(paramFile));
+    paramFname{1} = fullfile(outputDir,[f,e]);
+    %else
+    %    paramFname{1} = which(paramFile);
+    %end
 
 elseif iscell(paramFile) %we have a cell array of elastix parameter files
     paramFname = paramFile;
@@ -261,6 +264,7 @@ elseif iscell(paramFile) %we have a cell array of elastix parameter files
             %So paramFname is now:
             [~,f,e] = fileparts(paramFname{ii});
             paramFname{ii} = fullfile(outputDir,[f,e]);
+
         end
     end
 
