@@ -112,10 +112,10 @@ end
 
 if ismac
 
-    if nargin==1 || all(cmd==0)
-        app.TextMessage('Usage: bart <command> <arguments...>');
-        return
-    end
+    % if nargin==1 || all(cmd==0)
+    %     app.TextMessage('Usage: bart <command> <arguments...>');
+    %     return
+    % end
 
     bart_path = getenv('TOOLBOX_PATH');
 
