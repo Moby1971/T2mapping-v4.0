@@ -1,4 +1,4 @@
-function varargout=transformix(movingImage,parameters,~)
+function varargout=transformix(movingImage,parameters,verbose)
 % transformix image registration and warping wrapper
 %
 % function [registeredImage,log] = transformix(movingImage,parameters) 
@@ -88,20 +88,20 @@ function varargout=transformix(movingImage,parameters,~)
 % - elastix and transformix binaries in path
 % - image processing toolbox (to run examples)
 
-verbose = 0;
+
 
 %Confirm that the transformix binary is present
 [~,transformix_version] = system('transformix --version');
 
 r=regexp(transformix_version,'error', 'once');
 if ~isempty(r)
-    %fprintf('\n*** ERROR starting transformix binary:\n%s\n',transformix_version)
+    fprintf('\n*** ERROR starting transformix binary:\n%s\n',transformix_version)
     return
 end
 
 r=regexp(transformix_version,'version', 'once');
 if isempty(r)
-    %fprintf('\n*** ERROR: Unable to find transformix binary in system path. Quitting ***\n')
+    fprintf('\n*** ERROR: Unable to find transformix binary in system path. Quitting ***\n')
     return
 end
 
@@ -207,16 +207,7 @@ if nargin>1
     end
 
     %MATLAB should figure out the correct temporary directory on Windows
-     if ispc
-        outputDirTmp = 'C:\tmp\';
-        if ~exist(outputDirTmp, 'dir')
-            mkdir(outputDirTmp);
-        end
-    else
-        outputDirTmp = tempdir;
-    end
-
-    outputDir=fullfile(outputDirTmp,sprintf('transformix_%s_%d', datestr(now,'yymmddHHMMSS'), round(rand*1E8))); 
+    outputDir=fullfile(tempdir,sprintf('transformix_%s_%d', datestr(now,'yymmddHHMMSS'), round(rand*1E8))); 
 
     if ~exist(outputDir,'dir')
         if ~mkdir(outputDir)

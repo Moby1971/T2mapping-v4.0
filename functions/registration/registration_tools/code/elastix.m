@@ -1,4 +1,4 @@
-function varargout=elastix(app,movingImage,fixedImage,outputDir,paramFile,varargin) 
+function varargout=elastix(movingImage,fixedImage,outputDir,paramFile,varargin)
 % elastix image registration and warping wrapper
 %
 % function varargout=elastix(movingImage,fixedImage,outputDir,paramFile)
@@ -90,32 +90,31 @@ function varargout=elastix(app,movingImage,fixedImage,outputDir,paramFile,vararg
 % - elastix and transformix binaries in path
 % - image processing toolbox (to run examples)
 
+
 %----------------------------------------------------------------------
 % *** Handle default options ***
 
-% % app.TextMessage('1');
 
 %Confirm that the elastix binary is present and can run
-[~,elastix_version] = system('elastix --version');
+%[~,elastix_version] = system('elastix --version');
 
-r=regexp(elastix_version,'error', 'once');
-if ~isempty(r)
+%r=regexp(elastix_version,'error', 'once');
+%if ~isempty(r)
     %fprintf('\n*** ERROR starting elastix binary:\n%s\n',elastix_version)
-    return
-end
+%    return
+%end
 
-r=regexp(elastix_version,'version', 'once');
-if isempty(r)
+%r=regexp(elastix_version,'version', 'once');
+%if isempty(r)
     %fprintf('\n*** ERROR: Unable to find elastix binary in system path. Quitting ***\n')
-    return
-end
+%    return
+%end
 
-if nargin==0
-    help(mfilename)
-    return
-end
+% if nargin==0
+%     help(mfilename)
+%     return
+% end
 
-% % app.TextMessage('2');
 
 %If the user supplies one input argument only and this is is a string then
 %we assume it's a request for the help or version so we run it
@@ -130,14 +129,13 @@ if nargin==1 && ischar(movingImage)
     return
 end
 
-% % app.TextMessage('3');
-
 if ndims(movingImage) ~= ndims(fixedImage)
     %fprintf('movingImage and fixedImage must have the same number of dimensions\n')
     return
 end
 
-% % app.TextMessage('4');
+
+
 
 % Make directory into which we will write the image files and associated registration files
 if nargin<3 || isempty(outputDir)
@@ -147,11 +145,10 @@ else
     deleteDirOnCompletion=0;
 end
 
-% % app.TextMessage('5');
-
 if strcmp(outputDir(end),filesep) %Chop off any trailing fileseps
     outputDir(end)=[];
 end
+
 
 if ~exist(outputDir,'dir') || isempty(outputDir)
     if ~mkdir(outputDir)
@@ -159,13 +156,10 @@ if ~exist(outputDir,'dir') || isempty(outputDir)
     end
 end
 
-% % app.TextMessage('5');
-
 if nargin<4
     paramFile=[];
 end
 
-% % app.TextMessage('6');
 
 if isempty(paramFile)
     defaultParam = 'elastix_default.yml';
@@ -173,7 +167,6 @@ if isempty(paramFile)
     paramFile = defaultParam;
 end
 
-% % app.TextMessage('7');
 
 %Handle parameter/value pairs
 p = inputParser;
@@ -182,15 +175,11 @@ p.addParameter('t0', [])
 p.addParameter('verbose', 0)
 p.addParameter('paramstruct', [], @(x) isstruct(x) || iscell(x))
 
-% % app.TextMessage('8');
-
 parse(p,varargin{:})
 threads = p.Results.threads;
 t0 = p.Results.t0;
 paramstruct = p.Results.paramstruct;
 verbose = p.Results.verbose;
-
-% % app.TextMessage('9');
 
 % Convert paramstruct to cell array if needed
 if ~isempty(paramstruct)
@@ -202,7 +191,6 @@ if ~isempty(paramstruct)
     end
 end
 
-% app.TextMessage('10');
 
 %error check: confirm initial parameter files exist
 if ~isempty(t0)
@@ -218,44 +206,34 @@ if ~isempty(t0)
     end
 end
 
-% app.TextMessage('11');
-
 
 
 %----------------------------------------------------------------------
 % *** Conduct the registration ***
 
-% app.TextMessage('12');
-
-if strcmp('.',outputDir)
-    [~,dirName]=fileparts(pwd);
-else
-    [~,dirName]=fileparts(outputDir);
-end
-
-% app.TextMessage('13');
-
+% if strcmp('.',outputDir)
+%     [~,dirName]=fileparts(pwd);
+% else
+%    [~,dirName] = fileparts(outputDir);
+% end
+dirName = outputDir;
 
 % Create and move the images
 movingFname=[dirName,'_moving']; %TODO: so the file name contains the dir name?
 mhd_write(movingImage,movingFname);
-if ~strcmp(outputDir,'.')
-    if ~movefile([movingFname,'.*'],outputDir); error('Can''t move files'), end
-end
-
-% app.TextMessage('14');
+%if ~strcmp(outputDir,'.')
+%    if ~movefile([movingFname,'.*'],outputDir); error('Can''t move files'), end
+%end
 
 %create fixedImage only if we're registering to an image. parameters
 %may have been supplied instead
 if isnumeric(fixedImage)
     targetFname=[dirName,'_target'];
     mhd_write(fixedImage,targetFname);
-    if ~strcmp(outputDir,'.') %Don't copy if we're already in the directory
-        if ~movefile([targetFname,'.*'],outputDir); error('Can''t move files'), end
-    end
+  %  if ~strcmp(outputDir,'.') %Don't copy if we're already in the directory
+  %      if ~movefile([targetFname,'.*'],outputDir); error('Can''t move files'), end
+  %  end
 end
-
-% app.TextMessage('15');
 
 %Build the parameter file(s)
 %modify settings from YAML with paramstruct
@@ -271,16 +249,14 @@ elseif ischar(paramFile) && endsWith(paramFile,'.yml') && isempty(paramstruct) %
     elastix_parameter_write(paramFname{1},paramFile)
 
 elseif (ischar(paramFile) && endsWith(paramFile,'.txt')) %we have an elastix parameter file
-    % if ~strcmp(outputDir,'.')
-    copyfile(which(paramFile),outputDir)
-    % Build the correct parameter file name with path pointing to output dir
-    [~,f,e] = fileparts(which(paramFile));
-    paramFname{1} = fullfile(outputDir,[f,e]);
-    %else
-    %    paramFname{1} = which(paramFile);
-    %end
-
-    % app.TextMessage('16');
+    if ~strcmp(outputDir,'.')
+        copyfile(paramFile,outputDir)
+        % Build the correct parameter file name with path pointing to output dir
+        [~,f,e] = fileparts(paramFile);
+        paramFname{1} = fullfile(outputDir,[f,e]);
+    else
+        paramFname{1} = paramFile;
+    end
 
 elseif iscell(paramFile) %we have a cell array of elastix parameter files
     paramFname = paramFile;
@@ -290,15 +266,12 @@ elseif iscell(paramFile) %we have a cell array of elastix parameter files
             %So paramFname is now:
             [~,f,e] = fileparts(paramFname{ii});
             paramFname{ii} = fullfile(outputDir,[f,e]);
-
         end
     end
 
 else
     error('paramFile format in file not understood')
 end
-
-% app.TextMessage('17');
 
 
 %If the user asked for an initial transform, collate the transform files, copy them to the
@@ -325,29 +298,26 @@ else
     initCMD = '';
 end
 
-% app.TextMessage('18');
-
 
 %Build the the appropriate command
-if ispc
-    elx = which('elastix.exe');
-    CMD = strcat(elx," -f ",char(34),fullfile(outputDir,targetFname),".mhd",char(34)," -m ",char(34),fullfile(outputDir,movingFname),".mhd",char(34)," -out ",char(34),outputDir,char(34));
-else
-    CMD = strcat("elastix -f ",char(34),fullfile(outputDir,targetFname),".mhd",char(34)," -m ",char(34),fullfile(outputDir,movingFname),".mhd",char(34)," -out ",char(34),outputDir,char(34));
-end
+% CMD=sprintf('elastix -f "%s.mhd" -m "%s.mhd" -out "%s" ',...
+%     fullfile(outputDir,targetFname),...
+%     fullfile(outputDir,movingFname),...
+%     outputDir);
+
+CMD=sprintf('elastix -f "%s.mhd" -m "%s.mhd" -out "%s" ',...
+    fullfile(targetFname),...
+    fullfile(movingFname),...
+    outputDir);
 
 
-% app.TextMessage('19');
 
-CMD = char(strcat(CMD," ",initCMD));
+CMD = [CMD,initCMD];
 
-% app.TextMessage('20');
 
 if ~isempty(threads)
     CMD = sprintf('%s -threads %d',CMD,threads);
 end
-
-
 
 
 %Loop through, adding each parameter file in turn to the string
@@ -355,33 +325,32 @@ for ii=1:length(paramFname)
     CMD=[CMD,sprintf('-p "%s" ', paramFname{ii})];
 end
 
-% app.TextMessage('22');
-
-% app.TextMessage(CMD);
-
 %store a copy of the command to the directory
 cmdFid = fopen(fullfile(outputDir,'CMD'),'w');
-%fprintf(cmdFid,'%s\n',CMD);
+fprintf(cmdFid,'%s\n',CMD);
 fclose(cmdFid);
 
-% app.TextMessage('23');
+
+
+
 
 % Run the command and report back if it failed
 %fprintf('Running: %s\n',CMD)
 
+CMD = string(CMD);
+
+
 [status,result] = system(CMD);
 
-% % app.TextMessage('24');
-% % app.TextMessage(num2str(status))
 
 
 if status %Things failed. Oh dear.
-
-    app.TextMessage('failure');
-    app.TextMessage(num2str(result));
-    %fprintf('\n\t*** Transform Failed! ***\n%s\n',result)
-    %fprintf('\tYou may want to check out the Elastix FAQ: https://github.com/SuperElastix/elastix/wiki/FAQ\n')
-    % % app.TextMessage(num2str(result));
+    if status
+        %fprintf('\n\t*** Transform Failed! ***\n%s\n',result)
+        %fprintf('\tYou may want to check out the Elastix FAQ: https://github.com/SuperElastix/elastix/wiki/FAQ\n')
+    else
+        disp(result)
+    end
     registered=[];
     out.outputDir=outputDir;
     out.TransformParameters=nan;
@@ -395,7 +364,6 @@ if status %Things failed. Oh dear.
 else %Things worked! So let's return stuff to the user
 
     if nargout>1
-
         %Return the transform parameters
         d=dir(fullfile(outputDir,'TransformParameters.*.txt'));
         for ii=1:length(d)
@@ -426,31 +394,24 @@ else %Things worked! So let's return stuff to the user
 
     if nargout>0
 
-        % % app.TextMessage('things worked');
         %return the final transformed image
         d=dir(fullfile(outputDir,'result*.*'));
         d(cellfun(@(x) endsWith(x,'.raw'),{d.name}))=[]; % remove .raw files
         if isempty(d)
-            % % app.TextMessage('could not find transformed result image');
             %fprintf('WARNING: could find no transformed result images in %s\n',outputDir);
             registered=[];
         else
-            % % app.TextMessage('could find transformed result image');
             fullPath = [outputDir,filesep,d(end).name];
-            % % app.TextMessage(fullPath)
             registered = getImage(fullPath);
-            % % app.TextMessage(num2str(size(registered)))
         end
     end %if nargout
 
 end
 
-% % app.TextMessage('25');
+
 
 %Optionally return to the command line
 if nargout>0
-
-    % % app.TextMessage('there is a result');    
     varargout{1}=registered;
     if deleteDirOnCompletion
         %fprintf('Deleting temporary directory %s\n',outputDir)
@@ -462,15 +423,14 @@ if nargout>1
     varargout{2}=out;
 end
 
-% % app.TextMessage('26');
+
 
 
 function im = getImage(fname)
-
 % Load images of the correct type
-[~,~,ext] = fileparts(fname);
+[~,~,ext]=fileparts(fname);
 if strcmp(ext,'.mhd')
-    im = mhd_read(fname);
+    im=mhd_read(fname);
 elseif strcmp(ext,'.tif') || strcmp(ext,'.tiff')
     im = load3Dtiff(fname);
 end
