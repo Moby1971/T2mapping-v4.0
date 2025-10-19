@@ -44,3 +44,5 @@ functions/export/niftii/nii_tool.m
 functions/export/niftii/nii_viewer.m
 functions/export/niftii/nii_xform.m
 functions/registration/registerImagesBart.m
+functions/various/lipariColorMap.m
+functions/various/naviaColorMap.m
